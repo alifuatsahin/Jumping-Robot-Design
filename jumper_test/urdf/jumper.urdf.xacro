@@ -1,0 +1,218 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="jumper">
+
+    <xacro:property name="link1" value="20" />
+    <xacro:property name="link2" value="70" />
+    <xacro:property name="link3" value="70" />
+    <xacro:property name="link4" value="20" />
+    <xacro:property name="link5" value="70" />
+
+    <xacro:property name="width" value="1" />
+    <xacro:property name="angle" value="pi/6" />
+
+    <material name="white">
+        <color rgba="1 1 1 1"/>
+    </material>
+   
+    <material name="red">
+        <color rgba="1 0.1 0.1 1"/>
+    </material>
+
+     <material name="green">
+        <color rgba="0.1 1 0.1 1"/>
+    </material>
+
+    <material name="blue">
+        <color rgba="0.1 0.1 1 1"/>
+    </material>
+    
+    <material name="black">
+        <color rgba="0.1 0.1 0.1 1"/>
+    </material>
+
+    <link name="base_link">
+        <visual>
+            <geometry>
+                <cylinder radius="${width}" length="${link1}"/>
+            </geometry>
+            <origin rpy="${pi/2} 0.0 0.0"/>
+            <material name="green"/>
+        </visual>
+    </link>
+
+    <link name="dummy_link12">
+        <visual>
+            <geometry>
+                <sphere radius="${width}"/>
+            </geometry>
+            <origin xyz="0.0 0.0 0.0"/>
+            <material name="white"/>
+        </visual>
+    </link>
+
+    <joint name="dummy_joint12" type="fixed">
+        <origin xyz="0.0 ${-link1/2} 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="dummy_link12"/>
+    </joint>
+
+    <link name="dummy_link13">
+        <visual>
+            <geometry>
+                <sphere radius="${width}"/>
+            </geometry>
+            <origin xyz="0.0 0.0 0.0"/>
+            <material name="white"/>
+        </visual>
+    </link>
+
+    <joint name="dummy_joint13" type="fixed">
+        <origin xyz="0.0 ${link1/2} 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="dummy_link13"/>
+    </joint>
+
+    <link name="link2">
+        <visual>
+            <geometry>
+                <cylinder radius="${width}" length="${link2}"/>
+            </geometry>
+            <origin xyz="0.0 ${link2/2*sin(pi/6)} ${-link2/2*cos(pi/6)}" rpy="${pi/6} 0.0 0.0"/>
+            <material name="blue"/>
+        </visual>
+    </link>
+
+    <link name="link3">
+        <visual>
+            <geometry>
+                <cylinder radius="${width}" length="${link3}"/>
+            </geometry>
+            <origin xyz="0.0 ${link3/2*sin(pi/6)} ${-link3/2*cos(pi/6)}" rpy="${pi/6} 0.0 0.0"/>
+            <material name="red"/>
+        </visual>
+    </link>
+
+    <joint name="t12_joint" type="continous">
+        <parent link="dummy_link12"/>
+        <child link="link2"/>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <axis xyz="1.0 0.0 0.0"/>
+    </joint>
+    
+    <joint name="t13_joint" type="continous">
+        <parent link="dummy_link13"/>
+        <child link="link3"/>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <axis xyz="1.0 0.0 0.0"/>
+    </joint>
+
+    <link name="link4">
+        <visual>
+            <geometry>
+                <cylinder radius="${width}" length="${link4}"/>
+            </geometry>
+            <origin xyz="0.0 ${link4/2} 0.0" rpy="${pi/2} 0.0 0.0"/>
+            <material name="green"/>
+        </visual>
+    </link>
+
+    <link name="dummy_link24">
+        <visual>
+            <geometry>
+                <sphere radius="${width}"/>
+            </geometry>
+            <origin xyz="0.0 0.0 0.0"/>
+            <material name="white"/>
+        </visual>
+    </link>
+
+    <joint name="dummy_joint24" type="fixed">
+        <origin xyz="0.0 ${link2*sin(pi/6)} ${-link2*cos(pi/6)}" rpy="0.0 0.0 0.0"/>
+        <parent link="link2"/>
+        <child link="dummy_link24"/>
+    </joint>
+
+    <link name="dummy_link34">
+        <visual>
+            <geometry>
+                <sphere radius="${width}"/>
+            </geometry>
+            <origin xyz="0.0 0.0 0.0"/>
+            <material name="white"/>
+        </visual>
+    </link>
+
+    <joint name="dummy_joint34" type="fixed">
+        <origin xyz="0.0 ${link3*sin(pi/6)} ${-link3*cos(pi/6)}" rpy="0.0 0.0 0.0"/>
+        <parent link="link3"/>
+        <child link="dummy_link34"/>
+    </joint>
+
+    <joint name="t34_joint" type="continous">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="dummy_link34"/>
+        <child link="link4"/>
+        <axis xyz="1.0 0.0 0.0"/>
+    </joint>
+
+    <joint name="t24_joint" type="continous">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="dummy_link24"/>
+        <child link="link4"/>
+        <axis xyz="1.0 0.0 0.0"/>
+    </joint>
+
+    <link name="link5">
+        <visual>
+            <geometry>
+                <cylinder radius="${width}" length="${link5}"/>
+            </geometry>
+            <origin xyz="${link5/2*sin(pi/6)} ${-link5/2*cos(pi/6)} 0.0" rpy="${pi/2} 0.0 ${pi/6}"/>
+        </visual>
+    </link>
+
+    <joint name="t45_joint" type="fixed">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="link4"/>
+        <child link="link5"/>
+    </joint>
+
+    <link name="link6">
+        <visual>
+            <geometry>
+                <cylinder radius="${width}" length="${link5}"/>
+            </geometry>
+            <origin xyz="${-link5/2*sin(pi/6)} ${-link5/2*cos(pi/6)} 0.0" rpy="${pi/2} 0.0 ${-pi/6}"/>
+        </visual>
+    </link>
+
+    <joint name="t46_joint" type="fixed">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="link4"/>
+        <child link="link6"/>
+    </joint>
+
+    <xacro:macro name="basic_link" params="prefix length width material">
+        <link name="{prefix}">
+            <inertial>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <mass value="0.0"/>
+                <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
+            </inertial>
+            <visual>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <cylinder length="{length}" width="{width}"/>
+                </geometry>
+                <material name="{material}"/>
+            </visual>
+            <collision>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <box size="0.0 0.0 0.0"/>
+                </geometry>
+            </collision>
+        </link>
+    </xacro:macro>
+
+</robot>

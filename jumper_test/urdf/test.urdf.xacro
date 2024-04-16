@@ -1,0 +1,197 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="test">
+
+    <xacro:property name="l1" value="${30/1000}"/>
+    <xacro:property name="l2" value="${70/1000}"/>
+    <xacro:property name="l3" value="${l2}"/>
+    <xacro:property name="l4" value="${l1}"/>
+    <xacro:property name="l5" value="${80/1000}"/>
+
+    <xacro:property name="t" value="${1.5/1000}"/>
+    <xacro:property name="w" value="${8/1000}"/>
+    <xacro:property name="h" value="${10/1000}"/>
+    <xacro:property name="angle" value="pi/6" />
+
+    <xacro:property name="d" value="${1.2*1000}"/>
+
+    <material name="white">
+        <color rgba="1 1 1 1"/>
+    </material>
+   
+    <material name="red">
+        <color rgba="1 0.1 0.1 1"/>
+    </material>
+
+     <material name="green">
+        <color rgba="0.1 1 0.1 1"/>
+    </material>
+
+    <material name="blue">
+        <color rgba="0.1 0.1 1 1"/>
+    </material>
+    
+    <material name="black">
+        <color rgba="0.1 0.1 0.1 1"/>
+    </material>
+
+    <link name="base_link">
+        <inertial>
+            <origin xyz="0.0 0.0 ${1.2*l2}" rpy="${pi/2} 0.0 0.0"/>
+            <mass value="${pi*t*t*l1*d*10}"/>
+            <inertia ixx="${1/12*pi*t*t*l1*d*(3*t*t+l1*l1)}" ixy="0.0" ixz="0.0" iyy="${1/12*t*t*l1*d*(3*t*t+l1*l1)}" iyz="0.0" izz="${1/2*t*t*l1*d*t*t}"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.0 0.0 ${1.2*l2}" rpy="${pi/2} 0.0 0.0"/>
+            <geometry>
+                <box size="${w} ${h} ${2*l1}"/>
+            </geometry>
+            <material name="green"/>
+        </visual>
+        <collision>
+            <origin xyz="0.0 0.0 ${1.2*l2}" rpy="${pi/2} 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${t}" length="${l1}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="link2">
+        <inertial>
+            <origin xyz="0.0 ${l2/2*sin(pi/4)} ${-l2/2*cos(pi/4)}" rpy="${pi/4} 0.0 0.0"/>
+            <mass value="${pi*t*t*l2*d}"/>
+            <inertia ixx="${1/12*pi*t*t*l2*d*(3*t*t+l2*l2)}" ixy="0.0" ixz="0.0" iyy="${1/12*t*t*l2*d*(3*t*t+l2*l2)}" iyz="0.0" izz="${1/2*t*t*l2*d*t*t}"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.0 ${l2/2*sin(pi/4)} ${-l2/2*cos(pi/4)}" rpy="${pi/4} 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${t}" length="${l2}"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <origin xyz="0.0 ${l2/2*sin(pi/4)} ${-l2/2*cos(pi/4)}" rpy="${pi/4} 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${t}" length="${l2}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="link3">
+        <inertial>
+            <origin xyz="0.0 ${-l3/2*sin(pi/4)} ${l3/2*cos(pi/4)}" rpy="${pi/4} 0.0 0.0"/>
+            <mass value="${pi*t*t*l3*d}"/>
+            <inertia ixx="${1/12*pi*t*t*l3*d*(3*t*t+l3*l3)}" ixy="0.0" ixz="0.0" iyy="${1/12*t*t*l3*d*(3*t*t+l3*l3)}" iyz="0.0" izz="${1/2*t*t*l3*d*t*t}"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.0 ${-l3/2*sin(pi/4)} ${l3/2*cos(pi/4)}" rpy="${pi/4} 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${t}" length="${l3}"/>
+            </geometry>
+            <material name="red"/>
+        </visual>
+        <collision>
+            <origin xyz="0.0 ${-l3/2*sin(pi/4)} ${l3/2*cos(pi/4)}" rpy="${pi/4} 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${t}" length="${l3}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="link4">
+        <inertial>
+            <origin xyz="0.0 ${l4/2} 0.0" rpy="${pi/2} 0.0 0.0"/>
+            <mass value="${pi*t*t*l4*d}"/>
+            <inertia ixx="${1/12*pi*t*t*l4*d*(3*t*t+l4*l4)}" ixy="0.0" ixz="0.0" iyy="${1/12*t*t*l4*d*(3*t*t+l4*l4)}" iyz="0.0" izz="${1/2*t*t*l4*d*t*t}"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.0 ${l4/2} 0.0" rpy="${pi/2} 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${t}" length="${l4}"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <collision>
+            <origin xyz="0.0 ${l4/2} 0.0" rpy="${pi/2} 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${t}" length="${l4}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="link5">
+        <inertial>
+            <origin xyz="${l5/2*sin(pi/6)} ${-l5/2*cos(pi/6)} 0.0" rpy="${pi/2} 0.0 ${pi/6}"/>
+            <mass value="${pi*t*t*l5*d}"/>
+            <inertia ixx="${1/12*pi*t*t*l5*d*(3*t*t+l5*l5)}" ixy="0.0" ixz="0.0" iyy="${1/12*t*t*l5*d*(3*t*t+l5*l5)}" iyz="0.0" izz="${1/2*t*t*l5*d*t*t}"/>
+        </inertial>
+        <visual>
+            <origin xyz="${l5/2*sin(pi/6)} ${-l5/2*cos(pi/6)} 0.0" rpy="${pi/2} 0.0 ${pi/6}"/>
+            <geometry>
+                <cylinder radius="${t}" length="${l5}"/>
+            </geometry>
+            <material name="red"/>
+        </visual>
+        <collision>
+            <origin xyz="${l5/2*sin(pi/6)} ${-l5/2*cos(pi/6)} 0.0" rpy="${pi/2} 0.0 ${pi/6}"/>
+            <geometry>
+                <cylinder radius="${t}" length="${l5}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="link5s">
+        <inertial>
+            <origin xyz="${-l5/2*sin(pi/6)} ${-l5/2*cos(pi/6)} 0.0" rpy="${pi/2} 0.0 ${-pi/6}"/>
+            <mass value="${pi*t*t*l5*d}"/>
+            <inertia ixx="${1/12*pi*t*t*l5*d*(3*t*t+l5*l5)}" ixy="0.0" ixz="0.0" iyy="${1/12*t*t*l5*d*(3*t*t+l5*l5)}" iyz="0.0" izz="${1/2*t*t*l5*d*t*t}"/>
+        </inertial>
+        <visual>
+            <origin xyz="${-l5/2*sin(pi/6)} ${-l5/2*cos(pi/6)} 0.0" rpy="${pi/2} 0.0 ${-pi/6}"/>
+            <geometry>
+                <cylinder radius="${t}" length="${l5}"/>
+            </geometry>
+            <material name="red"/>
+        </visual>
+        <collision>
+            <origin xyz="${-l5/2*sin(pi/6)} ${-l5/2*cos(pi/6)} 0.0" rpy="${pi/2} 0.0 ${-pi/6}"/>
+            <geometry>
+                <cylinder radius="${t}" length="${l5}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="j12" type="revolute">
+        <origin xyz="0.0 ${-l1/2} ${1.2*l2}" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="link2"/>
+        <axis xyz="1.0 0.0 0.0"/>
+        <limit lower="0.0" upper="${pi}" effort="${100}" velocity="${pi}"/>
+    </joint>
+
+    <joint name="j25s" type="continuous">
+        <origin xyz="0.0 ${l2*sin(pi/4)} ${-l2*cos(pi/4)}" rpy="0.0 0.0 0.0"/>
+        <parent link="link2"/>
+        <child link="link5s"/>
+        <axis xyz="1.0 0.0 0.0"/>
+    </joint>
+
+    <joint name="j5s5" type="fixed">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="link5s"/>
+        <child link="link5"/>
+    </joint>
+
+    <joint name="j54" type="fixed">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="link5"/>
+        <child link="link4"/>
+    </joint>
+
+    <joint name="j43" type="continuous">
+        <origin xyz="0.0 ${l4} 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="link4"/>
+        <child link="link3"/>
+        <axis xyz="1.0 0.0 0.0"/>
+    </joint>
+
+</robot>
