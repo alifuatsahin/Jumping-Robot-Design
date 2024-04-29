@@ -15,7 +15,7 @@ compression = 40*np.pi/180
 
 ## Simulation
 cwd = os.getcwd()
-urdf_path = os.path.join(cwd, "jumper_test/urdf/test.urdf")
+urdf_path = os.path.join(cwd, "../urdf/test.urdf")
 
 p.connect(p.GUI) #p.DIRECT
 p.resetSimulation()
