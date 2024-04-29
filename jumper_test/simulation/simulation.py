@@ -11,11 +11,11 @@ urdf_angle = 45*np.pi/180
 stiffness = 1/1000
 rest = 45*np.pi/180
 friction = 1.3
-compression = 40*np.pi/180
+compression = 20*np.pi/180
 
 ## Simulation
 cwd = os.getcwd()
-urdf_path = os.path.join(cwd, "jumper_test/urdf/test.urdf")
+urdf_path = os.path.join(cwd, "urdf/test.urdf")
 
 p.connect(p.GUI) #p.DIRECT
 p.resetSimulation()
