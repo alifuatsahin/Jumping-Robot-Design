@@ -40,10 +40,25 @@ def genetic_algorith():
                            keep_parents=2,
                            crossover_type="single_point",
                            mutation_type="random",
-                           mutation_percent_genes=10)
+                           mutation_percent_genes=None,
+                           mutation_num_genes=1)
 
     # Run the genetic algorithm
     ga_instance.run()
+
+    # Get the best solution found by the genetic algorithm
+    best_solution = ga_instance.best_solution()
+    print("Best solution:", best_solution)
+    return best_solution
+
+
+def pca():
+    print("Create pool")
+    param = Model.Parameters()
+    robot = Model.model()
+    length = robot.simulate()
+    
+    print("apply PCA")
 
     # Get the best solution found by the genetic algorithm
     best_solution = ga_instance.best_solution()

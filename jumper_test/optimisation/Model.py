@@ -45,14 +45,17 @@ class model():
     def __init__(self, parameters):
         self.parameters = parameters
 
-    def simulate(self):
+    def simulate(self,visualisation = False):
         print("start simulation")
         self.jump = []
         self.lenght = []
         cwd = os.getcwd()
        
         # p.connect(p.GUI)  # or p.DIRECT for non-graphical version
-        p.connect(p.DIRECT)
+        if visualisation:
+            p.connect(p.GUI)
+        else: 
+            p.connect(p.DIRECT)
         
         #Create Plane
         plane = p.createCollisionShape(p.GEOM_PLANE)
