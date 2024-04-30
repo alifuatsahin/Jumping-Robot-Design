@@ -75,7 +75,7 @@ class model():
 
         #Material Parameters
         density = self.parameters.density*1000 #kg/m3
-        stiffness = self.parameters.stiffness #N.m/deg
+        stiffness = self.parameters.stiffness/1000 #N.m/deg
 
         #Arrays
         link_Masses = []

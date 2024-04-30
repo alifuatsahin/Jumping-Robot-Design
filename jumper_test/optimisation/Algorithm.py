@@ -23,7 +23,7 @@ boundaries = np.array([
     [20, 150],
     [5, 30], #compression
     [10, 80], #rest
-    [1.5/1000, 14/1000] #spring
+    [1.5, 14] #spring
     ])
 
 # genetic algorithm
