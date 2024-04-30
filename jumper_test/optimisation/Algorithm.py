@@ -16,11 +16,15 @@ def obj(ga_instance,parameters,solution_idx):
 # Define the boundaries
 
 boundaries = np.array([
-    [2/100, 15/100], #link
-    [2/100, 15/100], #link
-    [1.5/1000, 14/1000], #spring
-    [10*np.pi/180, 80*np.pi/180], #rest
-    [5*np.pi/180, 30*np.pi/180]])
+    [20, 150], #link
+    [20, 150], 
+    [20, 150],
+    [20, 150],
+    [20, 150],
+    [5, 30], #compression
+    [10, 80], #rest
+    [1.5/1000, 14/1000] #spring
+    ])
 
 # genetic algorithm
 
@@ -30,7 +34,7 @@ def genetic_algorith():
                            num_parents_mating=5,
                            fitness_func=obj,
                            sol_per_pop=10,
-                           num_genes=5,
+                           num_genes=8,
                            gene_space=boundaries,
                            parent_selection_type="sss",
                            keep_parents=2,
