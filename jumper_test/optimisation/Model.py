@@ -17,7 +17,7 @@ class Parameters:
     #    self.urdf_angle = urdf_angle
     #    self.friction = friction #friction
     
-    def __init__(self, x,  friction = 1.3,density = 1.2, thickness = 4):
+    def __init__(self, x,  friction = 1.3,density = 1.2, thickness = 6):
         self.l1 = x[0]
         self.l2 = x[1]
         self.l3 = x[2]
@@ -75,7 +75,7 @@ class model():
 
         #Material Parameters
         density = self.parameters.density*1000 #kg/m3
-        stiffness = self.parameters.stiffness/1000 #N.m/deg
+        stiffness = self.parameters.stiffness/1000 #N.m/deg 
 
         #Arrays
         link_Masses = []
@@ -344,10 +344,10 @@ class model():
             
             
         self.max_high = max(self.jump)
-        self.max_lenght = max(self.lenght)
+        self.max_lenght = max(np.abs(self.lenght))
+        self.energy = self.parameters.stiffness*pow(self.parameters.compression,2)/2
         
-        print("max high",np.round(self.max_high,2),"[unit] max distance",np.round(self.max_lenght,2),"[unit]")
-        return self.max_lenght
+        print("max high",np.round(self.max_high,2),"[m] max distance",np.round(self.max_lenght,2),"[m] energy ",np.round(self.energy,2),"J")
     
     def plot(self):
         if (self.jump == []):

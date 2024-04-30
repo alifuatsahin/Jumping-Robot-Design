@@ -10,8 +10,8 @@ import pygad
 def obj(ga_instance,parameters,solution_idx):
     print("new model")
     robot = Model.model(Model.Parameters(parameters))
-    length = robot.simulate()
-    return length #/energy 
+    robot.simulate()
+    return robot.max_high/robot.energy #/energy 
 
 # Define the boundaries
 
