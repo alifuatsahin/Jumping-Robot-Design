@@ -1,9 +1,14 @@
 import numpy as np
 import Model #import the simulation and the model
-import pygad
+
+#PCA 
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 
 #genetic algorithms
 
+import pygad
 #https://pygad.readthedocs.io/en/latest/
 
 # Define the objective function 
@@ -52,15 +57,56 @@ def genetic_algorith():
     return best_solution
 
 
-def pca():
+def pca(sample, nb_component):
+    
     print("Create pool")
-    param = Model.Parameters()
-    robot = Model.model()
-    length = robot.simulate()
+    
+    column_names = ['Link1', 'Link2', 'Link3', 'Link4', 'Link5', 'Compression', 'Rest', 'Spring']
+    df = pd.DataFrame(columns=column_names)
+    
+    param = np.zeros(8)
+    
+    for i in range(sample):
+        for j, (lower, upper) in enumerate(boundaries):
+            param[j] = np.random.uniform(lower, upper)
+        robot = Model.model(Model.Parameters(parameters))
+        robot.simulate()
+        df.iloc[i] = 
     
     print("apply PCA")
+    scaler = MinMaxScaler()
+    scaled_df = scaler.fit_transform(df)
 
-    # Get the best solution found by the genetic algorithm
-    best_solution = ga_instance.best_solution()
-    print("Best solution:", best_solution)
-    return best_solution
+    # Perform PCA
+    pca = PCA(n_components=nb_component)  # Keep 10 components
+    principal_components = pca.fit_transform(scaled_df)
+
+# Visualize the explained variance ratio
+    plt.bar(range(1, pca.n_components_ + 1), pca.explained_variance_ratio_)
+    plt.xlabel('Principal Component')
+    plt.ylabel('Explained Variance Ratio')
+    plt.title('Explained Variance Ratio per Principal Component')
+    plt.show()
+    
+    biplot(principal_components, pca, labels=df.columns, label_size=8, arrow_length=15, arrow_width=0.01)
+    
+    return principal_components
+
+
+def biplot(principal_components, pca, labels=None, label_size=10, arrow_length=0.1, arrow_width=0.01):
+    plt.figure(figsize=[12,12])
+    # Plot data points
+    
+    plt.scatter(principal_components[:, 0], principal_components[:, 1], alpha=0.5)
+    
+    # Plot arrows for feature loadings
+    feature_vectors = pca.components_.T
+    for i, v in enumerate(feature_vectors):
+        plt.arrow(0, 0, v[0]*arrow_length, v[1]*arrow_length, color='r', alpha=0.5, width=arrow_width, head_width=2*arrow_width)
+        if labels is not None:
+            plt.text(v[0]*arrow_length, v[1]*arrow_length, labels[i], color='r', ha='right', va='bottom', fontsize=label_size)
+    
+    plt.xlabel('Principal Component 1')
+    plt.ylabel('Principal Component 2')
+    plt.title('Biplot')
+    plt.grid()
