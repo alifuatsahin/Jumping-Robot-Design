@@ -5,13 +5,19 @@ import time
 import os
 
 ## Simulation Data
-link3 = 70/1000
-link1 = 30/1000
+link3 = 7/100
+link1 = 3/100
 urdf_angle = 45*np.pi/180
 stiffness = 1/1000
 rest = 45*np.pi/180
 friction = 1.3
 compression = 40*np.pi/180
+
+link3 = 0.15
+link1 = 0.02
+stiffness = 0.014
+rest = 0.17453293
+compression = 0.52359878 
 
 ## Simulation
 cwd = os.getcwd()
