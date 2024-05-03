@@ -256,42 +256,55 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
                                   [0, 0, l3])
 
   p.setGravity(0, 0, -9.81)
-  p.setRealTimeSimulation(0)
+  p.setRealTimeSimulation(1)
 
-  for id in range(nJoints):
-    p.setJointMotorControl2(jumper, 
-                            jointIndex=id,
-                            controlMode=p.VELOCITY_CONTROL,
-                            force=0.001)
-    
-  # p.setJointMotorControl2(jumper,
-  #   jointIndex=0,
-  #   controlMode=p.TORQUE_CONTROL,
-  #   force=10,
-  #   )
-
-  step = 0.01
+  time_step = 1/240
   counter = 0
+  start = True
+  switch = 0
 
-  for step in range(3000):
+  while counter < 3:
       focus, _ = p.getBasePositionAndOrientation(jumper)
       p.resetDebugVisualizerCamera(cameraDistance=0.5, 
                                   cameraYaw=75, 
                                   cameraPitch=-20, 
                                   cameraTargetPosition=focus)
-      counter += step 
-      
-      motor_angle = (p.getJointState(jumper, 0)[0] + rest_angle)*180/np.pi
-      print(motor_angle)
-      
-      p.setJointMotorControl2(jumper,
-        jointIndex=0,
-        controlMode=p.TORQUE_CONTROL,
-        force=-motor_angle*stiffness,
-        )
+      counter += time_step
 
-      p.stepSimulation()
-      time.sleep(0.01)
+      if counter < 0.5 and start:
+        pass
+      elif start:
+        p.setRealTimeSimulation(0)
+        for id in range(nJoints):
+          p.setJointMotorControl2(jumper, 
+                                  jointIndex=id,
+                                  controlMode=p.VELOCITY_CONTROL,
+                                  force=0.001)
+        start = False
+      else:
+        motor_angle = (p.getJointState(jumper, 0)[0] + rest_angle)*180/np.pi
+        
+        p.setJointMotorControl2(jumper,
+          jointIndex=0,
+          controlMode=p.TORQUE_CONTROL,
+          force=-motor_angle*stiffness,
+          )
+        
+        contacts = p.getContactPoints(jumper, plane)
+        print(contacts)
 
+        for contact in contacts:
+          if contact[1] == jumper and contact[2] == plane:
+            if switch == 1:
+              switch = 2
+            break
+        if not contacts and switch == 0:
+          switch = 1
+        if switch == 2:
+          break
+
+        p.stepSimulation()
+
+      time.sleep(time_step)
 
 simulate(l1=60, l2=100, l3=100, l4=60, l5=80, compression=40, rest_angle=60, stiffness=8/1000)
