@@ -262,8 +262,10 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
   counter = 0
   start = True
   switch = 0
+  jump_distance = 0
+  time_limit = 5 #seconds
 
-  while counter < 3:
+  while counter < time_limit:
       focus, _ = p.getBasePositionAndOrientation(jumper)
       p.resetDebugVisualizerCamera(cameraDistance=0.5, 
                                   cameraYaw=75, 
@@ -291,7 +293,6 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
           )
         
         contacts = p.getContactPoints(jumper, plane)
-        print(contacts)
 
         for contact in contacts:
           if contact[1] == jumper and contact[2] == plane:
@@ -307,4 +308,15 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
 
       time.sleep(time_step)
 
-simulate(l1=60, l2=100, l3=100, l4=60, l5=80, compression=40, rest_angle=60, stiffness=8/1000)
+  if switch == 2:
+    final_pos_arr, _ = p.getBasePositionAndOrientation(jumper)
+    jump_distance = np.sqrt(pow(final_pos_arr[0], 2) + pow(final_pos_arr[1], 2))
+  
+  energy = 0.5*stiffness*pow(motor_angle, 2)*np.pi/180
+
+  return jump_distance, energy
+
+jump_distance, energy = simulate(l1=60, l2=100, l3=100, l4=60, l5=80, compression=40, rest_angle=60, stiffness=8/1000)
+
+print("Jump Distance: ", jump_distance)
+print("Energy: ", energy)
