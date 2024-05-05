@@ -1,5 +1,7 @@
 import numpy as np
 import Model #import the simulation and the model
+import pandas as pd
+import matplotlib.pyplot as plt
 
 #PCA 
 from sklearn.decomposition import PCA
@@ -16,7 +18,8 @@ def obj(ga_instance,parameters,solution_idx):
     print("new model")
     robot = Model.model(Model.Parameters(parameters))
     robot.simulate()
-    return robot.max_high/robot.energy #/energy 
+    return robot.max_lenght/robot.energy #/energy 
+
 
 # Define the boundaries
 
@@ -63,16 +66,20 @@ def pca(sample, nb_component):
     
     column_names = ['Link1', 'Link2', 'Link3', 'Link4', 'Link5', 'Compression', 'Rest', 'Spring']
     df = pd.DataFrame(columns=column_names)
+    result = pd.DataFrame()
     
     param = np.zeros(8)
     
     for i in range(sample):
         for j, (lower, upper) in enumerate(boundaries):
             param[j] = np.random.uniform(lower, upper)
-        robot = Model.model(Model.Parameters(parameters))
+        df = df.append(pd.Series(param, index=df.columns), ignore_index=True)
+        robot = Model.model(Model.Parameters(param))
         robot.simulate()
-        df.iloc[i] = 
-    
+        result = result.append([robot.max_length])
+
+    #print(df)
+    #print(result)
     print("apply PCA")
     scaler = MinMaxScaler()
     scaled_df = scaler.fit_transform(df)
@@ -81,23 +88,21 @@ def pca(sample, nb_component):
     pca = PCA(n_components=nb_component)  # Keep 10 components
     principal_components = pca.fit_transform(scaled_df)
 
+    return principal_components,result,pca,labels,df
 # Visualize the explained variance ratio
-    plt.bar(range(1, pca.n_components_ + 1), pca.explained_variance_ratio_)
-    plt.xlabel('Principal Component')
-    plt.ylabel('Explained Variance Ratio')
-    plt.title('Explained Variance Ratio per Principal Component')
-    plt.show()
-    
-    biplot(principal_components, pca, labels=df.columns, label_size=8, arrow_length=15, arrow_width=0.01)
-    
-    return principal_components
+    #plt.bar(range(1, pca.n_components_ + 1), pca.explained_variance_ratio_)
+    #plt.xlabel('Principal Component')
+    #plt.ylabel('Explained Variance Ratio')
+    #plt.title('Explained Variance Ratio per Principal Component')
+    #plt.show()
 
 
-def biplot(principal_components, pca, labels=None, label_size=10, arrow_length=0.1, arrow_width=0.01):
+
+def biplot(principal_components,result, pca, labels=None, label_size=10, arrow_length=0.1, arrow_width=0.01):
     plt.figure(figsize=[12,12])
     # Plot data points
     
-    plt.scatter(principal_components[:, 0], principal_components[:, 1], alpha=0.5)
+    plt.scatter(principal_components[:, 0], principal_components[:, 1],c=result.iloc[:, 0], cmap='viridis', alpha=0.5)
     
     # Plot arrows for feature loadings
     feature_vectors = pca.components_.T
@@ -110,3 +115,23 @@ def biplot(principal_components, pca, labels=None, label_size=10, arrow_length=0
     plt.ylabel('Principal Component 2')
     plt.title('Biplot')
     plt.grid()
+    plt.show()
+    
+def pca_plot(PC,result):
+    # Project data onto 2 dimensions for visualization
+    plt.figure()
+    plt.scatter(PC[:, 0], PC[:, 1],c=result.iloc[:, 0], cmap='viridis', alpha=0.5)
+    plt.xlabel('Principal Component 1')
+    plt.ylabel('Principal Component 2')
+    plt.title('Data Projected onto 2 Dimensions')
+    plt.grid()
+    plt.show()
+    
+    # Project data onto 2 dimensions for visualization
+    plt.figure()
+    plt.scatter(PC[:, 0], PC[:, 1],c=result.iloc[:, 0], cmap='viridis', alpha=0.5)
+    plt.xlabel('Principal Component 1')
+    plt.ylabel('Principal Component 2')
+    plt.title('Data Projected onto 2 Dimensions')
+    plt.grid()
+    plt.show()

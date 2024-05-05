@@ -39,7 +39,7 @@ class model():
     jump = []
     lenght = []
     max_high = 0
-    max_lenght = 0
+    max_length = 0
     energy = 0
     
     def __init__(self, parameters):
@@ -344,10 +344,10 @@ class model():
             
             
         self.max_high = max(self.jump)
-        self.max_lenght = max(np.abs(self.lenght))
+        self.max_length = max(np.abs(self.lenght))
         self.energy = self.parameters.stiffness*pow(self.parameters.compression,2)/2
         
-        print("max high",np.round(self.max_high,2),"[m] max distance",np.round(self.max_lenght,2),"[m] energy ",np.round(self.energy,2),"J")
+        print("max high",np.round(self.max_high,2),"[m] max distance",np.round(self.max_length,2),"[m] energy ",np.round(self.energy,2),"J")
     
     def plot(self):
         if (self.jump == []):
