@@ -47,7 +47,6 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
                           radius=t,
                           height=l1)
 
-  deg = np.rad2deg(rest_angle-compression)
   basePos = [0, 0, l2] #[x,y,z]
   base_orientation = [np.sqrt(2)/2, 0, 0, np.sqrt(2)/2] #quaternion [x,y,z,w]
   base_i_pos = [0, 0, 0]
@@ -281,7 +280,17 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
           p.setJointMotorControl2(jumper, 
                                   jointIndex=id,
                                   controlMode=p.VELOCITY_CONTROL,
-                                  force=0.001)
+                                  force=0.0008)
+          
+          p.changeDynamics(jumper, 
+                          id, 
+                          lateralFriction=0.8,
+                          spinningFriction=0.8,
+                          rollingFriction=0.8,
+                          restitution=0.9,
+                          contactStiffness=0.1,
+                          contactDamping=0.1,
+                          frictionAnchor=0)
         start = False
       else:
         motor_angle = (p.getJointState(jumper, 0)[0] + rest_angle)*180/np.pi
@@ -306,7 +315,7 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
 
         p.stepSimulation()
 
-      time.sleep(time_step)
+      time.sleep(0.015) # !!Comment out while optimizing!!
 
   if switch == 2:
     final_pos_arr, _ = p.getBasePositionAndOrientation(jumper)
