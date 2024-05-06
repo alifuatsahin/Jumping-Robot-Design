@@ -306,7 +306,8 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
         for contact in contacts:
           if contact[1] == jumper and contact[2] == plane:
             if switch == 1:
-              switch = 2
+                switch = 2
+                #switch = 1
             break
         if not contacts and switch == 0:
           switch = 1

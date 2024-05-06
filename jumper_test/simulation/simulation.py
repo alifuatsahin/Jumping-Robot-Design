@@ -23,9 +23,9 @@ compression = 0.52359878
 cwd = os.getcwd()
 
 #jade
-#urdf_path = os.path.join(cwd, "../urdf/test.urdf")
+urdf_path = os.path.join(cwd, "../urdf/test.urdf")
 
-urdf_path = os.path.join(cwd, "urdf/test.urdf")
+#urdf_path = os.path.join(cwd, "urdf/test.urdf")
 
 p.connect(p.GUI) #p.DIRECT
 p.resetSimulation()
