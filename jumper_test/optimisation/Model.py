@@ -28,7 +28,7 @@ class Parameters:
 
 class model():
     jump = []
-    lenght = []
+    length = []
     max_high = 0
     max_length = 0
     energy = 0
@@ -39,7 +39,7 @@ class model():
     def simulate(self,visualisation = False):
         print("start simulation")
         self.jump = []
-        self.lenght = []
+        self.length = []
         cwd = os.getcwd()
        
         # p.connect(p.GUI)  # or p.DIRECT for non-graphical version
@@ -311,7 +311,7 @@ class model():
         while counter < time_limit:
             focus, _ = p.getBasePositionAndOrientation(jumper)
             self.jump.append(focus[2])
-            self.lenght.append(focus[1])
+            self.length.append(focus[1])
             p.resetDebugVisualizerCamera(cameraDistance=0.5, 
                                   cameraYaw=75, 
                                   cameraPitch=-20, 
@@ -324,12 +324,12 @@ class model():
             elif start:
                 p.setRealTimeSimulation(0)
                 for id in range(nJoints):
-                p.setJointMotorControl2(jumper, 
+                    p.setJointMotorControl2(jumper, 
                                   jointIndex=id,
                                   controlMode=p.VELOCITY_CONTROL,
                                   force=0.001)
           
-          p.changeDynamics(jumper, 
+                    p.changeDynamics(jumper, 
                           id, 
                           lateralFriction=0.8,
                           spinningFriction=0.8,
@@ -338,47 +338,46 @@ class model():
                           #contactStiffness=0.1,
                           #contactDamping=0,
                           frictionAnchor=0)
-        start = False
-        else:
-            motor_angle = (p.getJointState(jumper, 0)[0] + rest_angle)*180/np.pi
+                start = False
+            else:
+                motor_angle = (p.getJointState(jumper, 0)[0] + rest_angle)*180/np.pi
         
-            p.setJointMotorControl2(jumper,
+                p.setJointMotorControl2(jumper,
           jointIndex=0,
           controlMode=p.TORQUE_CONTROL,
           force=-motor_angle*stiffness,
           )
         
-            contacts = p.getContactPoints(jumper, plane)
+                contacts = p.getContactPoints(jumper, plane)
 
-            for contact in contacts:
-                if contact[1] == jumper and contact[2] == plane:
-                if switch == 1:
-                    switch = 2
-                    break
+                for contact in contacts:
+                    if contact[1] == jumper and contact[2] == plane:
+                        if switch == 1:
+                            switch = 2
+                            break
                 if not contacts and switch == 0:
                     switch = 1
                 if switch == 2:
                     switch = 1
                     end_count += time_step
                     if end_count > 4*time_step:  #change the coef to manipulate terminating cond
-                    switch = 3
-                    break
+                        switch = 3
+                        break
 
-            p.stepSimulation()
+                p.stepSimulation()
 
-            time.sleep(0.015) # !!Comment out while optimizing!!
+            #time.sleep(0.015) # !!Comment out while optimizing!!
 
-            if switch == 3:
-                final_pos_arr, _ =   p.getBasePositionAndOrientation(jumper)
-                self.max_dist = np.sqrt(pow(final_pos_arr[0], 2) + pow(final_pos_arr[1], 2))
+        if switch == 3:
+            final_pos_arr, _ =   p.getBasePositionAndOrientation(jumper)
+            #self.max_dist = np.sqrt(pow(final_pos_arr[0], 2) + pow(final_pos_arr[1], 2))
+            self.max_high = max(self.jump)
+            self.max_length = max(np.abs(self.length))
   
-                self.energy = 0.5*stiffness*pow(motor_angle, 2)*np.pi/180
+        self.energy = 0.5*stiffness*pow(motor_angle, 2)*np.pi/180
                 
-                self.max_high = max(self.jump)
-                self.max_length = max(np.abs(self.lenght))
-                
-        
-        print("max high",np.round(self.max_high,2),"[m] max distance",np.round(self.max_length,2),"[m] max alternative",np.round(self.max_dist,2),"[m] energy ",np.round(self.energy,2),"J")
+        #print(switch)
+        print("max high",np.round(self.max_high,2),"[m] max distance",np.round(self.max_length,2),"[m] energy ",np.round(self.energy,2),"J")
     
 
         
@@ -388,6 +387,14 @@ class model():
             self.simulate()
         # Plot the curve
         plt.plot(np.arange(len(self.jump)), self.jump)
+        plt.xlabel('Index')
+        plt.ylabel('Value')
+        plt.title('Random Curve')
+        plt.grid(True)
+        plt.show()
+        
+        # Plot the curve
+        plt.plot(np.arange(len(self.length)), self.length)
         plt.xlabel('Index')
         plt.ylabel('Value')
         plt.title('Random Curve')
