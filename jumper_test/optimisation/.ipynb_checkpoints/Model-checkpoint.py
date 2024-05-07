@@ -7,15 +7,6 @@ import os
 import matplotlib.pyplot as plt
 
 class Parameters:
-    #def __init__(self, link3, link1, stiffness, rest, compression, urdf_angle = 45*np.pi/180,  friction = 1.3):
-    #    self.link3 = link3 #link
-    #    self.link1 = link1 #link 
-    #    self.stiffness = stiffness #spring stiffness
-    #    self.rest = rest #rest angle
-    #    self.compression = compression #compression angle
-        
-    #    self.urdf_angle = urdf_angle
-    #    self.friction = friction #friction
     
     def __init__(self, x,  friction = 1.3,density = 1.2, thickness = 6):
         self.l1 = x[0]
@@ -98,8 +89,6 @@ class model():
         base_c = p.createCollisionShape(shapeType=p.GEOM_CAPSULE,
                               radius=t,
                               height=l1)
-
-        deg = np.rad2deg(rest_angle-compression)
         basePos = [0, 0, l2] #[x,y,z]
         base_orientation = [np.sqrt(2)/2, 0, 0, np.sqrt(2)/2] #quaternion [x,y,z,w]
         base_i_pos = [0, 0, 0]
@@ -308,46 +297,91 @@ class model():
                                       [0, 0, l3])
 
         p.setGravity(0, 0, -9.81)
-        p.setRealTimeSimulation(0)
+        p.setRealTimeSimulation(1)
 
-        for id in range(nJoints):
-            p.setJointMotorControl2(jumper, 
-                                jointIndex=id,
-                                controlMode=p.VELOCITY_CONTROL,
-                                force=0.001)
-    
-
-        step = 0.01
+        time_step = 1/240
         counter = 0
-
-        for step in range(500):
+        start_count = 0
+        end_count = 0
+        start = True
+        switch = 0
+        jump_distance = 0
+        time_limit = 5 #seconds
+        
+        while counter < time_limit:
             focus, _ = p.getBasePositionAndOrientation(jumper)
-            
             self.jump.append(focus[2])
             self.lenght.append(focus[1])
             p.resetDebugVisualizerCamera(cameraDistance=0.5, 
-                                      cameraYaw=75, 
-                                      cameraPitch=-20, 
-                                      cameraTargetPosition=focus)
-            
-            counter += step 
+                                  cameraYaw=75, 
+                                  cameraPitch=-20, 
+                                  cameraTargetPosition=focus)
+            counter += time_step
+            start_count += time_step
+
+            if start_count < 0.5 and start:
+                pass
+            elif start:
+                p.setRealTimeSimulation(0)
+                for id in range(nJoints):
+                p.setJointMotorControl2(jumper, 
+                                  jointIndex=id,
+                                  controlMode=p.VELOCITY_CONTROL,
+                                  force=0.001)
+          
+          p.changeDynamics(jumper, 
+                          id, 
+                          lateralFriction=0.8,
+                          spinningFriction=0.8,
+                          rollingFriction=0.8,
+                          restitution=0.9,
+                          #contactStiffness=0.1,
+                          #contactDamping=0,
+                          frictionAnchor=0)
+        start = False
+        else:
             motor_angle = (p.getJointState(jumper, 0)[0] + rest_angle)*180/np.pi
-            
+        
             p.setJointMotorControl2(jumper,
-              jointIndex=0,
-              controlMode=p.TORQUE_CONTROL,
-              force=-motor_angle*stiffness,
-              )
+          jointIndex=0,
+          controlMode=p.TORQUE_CONTROL,
+          force=-motor_angle*stiffness,
+          )
+        
+            contacts = p.getContactPoints(jumper, plane)
+
+            for contact in contacts:
+                if contact[1] == jumper and contact[2] == plane:
+                if switch == 1:
+                    switch = 2
+                    break
+                if not contacts and switch == 0:
+                    switch = 1
+                if switch == 2:
+                    switch = 1
+                    end_count += time_step
+                    if end_count > 4*time_step:  #change the coef to manipulate terminating cond
+                    switch = 3
+                    break
 
             p.stepSimulation()
-            time.sleep(0.01)
-            
-            
-        self.max_high = max(self.jump)
-        self.max_length = max(np.abs(self.lenght))
-        self.energy = self.parameters.stiffness*pow(self.parameters.compression,2)/2
+
+            time.sleep(0.015) # !!Comment out while optimizing!!
+
+            if switch == 3:
+                final_pos_arr, _ =   p.getBasePositionAndOrientation(jumper)
+                self.max_dist = np.sqrt(pow(final_pos_arr[0], 2) + pow(final_pos_arr[1], 2))
+  
+                self.energy = 0.5*stiffness*pow(motor_angle, 2)*np.pi/180
+                
+                self.max_high = max(self.jump)
+                self.max_length = max(np.abs(self.lenght))
+                
         
-        print("max high",np.round(self.max_high,2),"[m] max distance",np.round(self.max_length,2),"[m] energy ",np.round(self.energy,2),"J")
+        print("max high",np.round(self.max_high,2),"[m] max distance",np.round(self.max_length,2),"[m] max alternative",np.round(self.max_dist,2),"[m] energy ",np.round(self.energy,2),"J")
+    
+
+        
     
     def plot(self):
         if (self.jump == []):
@@ -361,10 +395,3 @@ class model():
         plt.show()
         
         
-        
-#plt.plot(np.arange(len(length)), length)
-#plt.xlabel('Index')
-#plt.ylabel('Value')
-#plt.title('Random Curve')
-#plt.grid(True)
-#plt.show()

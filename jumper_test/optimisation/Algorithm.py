@@ -29,9 +29,10 @@ def function_obj(parameters):
     print("new model")
     robot = Model.model(Model.Parameters(parameters))
     robot.simulate()
-    return robot.max_length/robot.energy #/energy 
+    return robot.max_length/robot.energy
 # Define the boundaries
 
+parameter_name = ["l1", "l2", "l3", "l4", "l5", "compression", "rest_angle", "stiffness"]
 boundaries = np.array([
     [20, 150], #link
     [20, 150], 
@@ -42,6 +43,22 @@ boundaries = np.array([
     [10, 80], #rest
     [1.5, 14] #spring
     ])
+
+#this is not beautiful but it is working
+xrange = np.array([
+    np.linspace(boundaries[0][0],boundaries[0][1], 100), #link
+    np.linspace(boundaries[1][0],boundaries[1][1], 100), 
+    np.linspace(boundaries[2][0],boundaries[2][1], 100),
+    np.linspace(boundaries[3][0],boundaries[3][1], 100),
+    np.linspace(boundaries[4][0],boundaries[4][1], 100),
+    np.linspace(boundaries[5][0],boundaries[5][1], 100), #compression
+    np.linspace(boundaries[6][0],boundaries[6][1], 100), #rest
+    np.linspace(boundaries[7][0],boundaries[7][1], 100) #spring
+    ])
+
+# Set the value of beta for the UCB acquisition function
+beta = 2.0
+
 
 # genetic algorithm
 
@@ -69,13 +86,13 @@ def genetic_algorith(generation):
     return best_solution
 
 def expected_improvement(x, gp_model, best_y):
-    y_pred, y_std = gp_model.predict(x.reshape(-1, 1), return_std=True)
+    y_pred, y_std = gp_model.predict(x, return_std=True) #.reshape(-1, 1)
     z = (y_pred - best_y) / y_std
     ei = (y_pred - best_y) * norm.cdf(z) + y_std * norm.pdf(z)
     return ei
 
 def upper_confidence_bound(x, gp_model, beta):
-    y_pred, y_std = gp_model.predict(x.reshape(-1, 1), return_std=True)
+    y_pred, y_std = gp_model.predict(x, return_std=True)
     ucb = y_pred + beta * y_std
     return ucb
 
@@ -88,45 +105,207 @@ def bayesian_optimisation(iteration, initial_sample_size = 10, special_boundarie
         for i in range(initial_sample_size):
             for j, (lower, upper) in enumerate(boundaries): #random param
                 param[j] = np.random.uniform(lower, upper)
-            pool.append(param)
+            pool.append(param.copy())
             result.append(function_obj(param))
-            
             
     print("algo")
     # Gaussian process regressor with an RBF kernel
     kernel = RBF(length_scale=1.0)
     gp_model = GaussianProcessRegressor(kernel=kernel)
     
-    plt.figure(figsize=(10, 6))
-
     for i in range(iteration):
+        print("iteration")
         
         # Fit the Gaussian process model to the sampled points
-        gp_model.fit(pool.reshape(-1, 1), result)
+        gp_model.fit(pool, result)
 
         # Determine the point with the highest observed function value
         best_idx = np.argmax(result)
         best_x = pool[best_idx]
         best_y = result[best_idx]
-
-        # Set the value of beta for the UCB acquisition function
-        beta = 2.0
-
+        
         # Generate the Upper Confidence Bound (UCB) using the Gaussian process model
-        ucb = upper_confidence_bound(pool, gp_model, beta)
-
+        ucb = upper_confidence_bound(xrange.T, gp_model, beta)
+        
+        plt.figure(figsize=(10, 6))
         # Plot the black box function, surrogate function, previous points, and new points
-        plt.plot(pool[:, 0], ucb[:, 0], color='red', linestyle='dashed', label='Surrogate Function')
-        plt.scatter(pool[:, 0], result[:, 0], color='blue', label='Previous Points')
+        plt.plot(xrange[0], ucb, color='red', linestyle='dashed', label='Surrogate Function')
+        plt.scatter([arr[0] for arr in pool], result, color='blue', label='Previous Points')
+        plt.show()
 
         if i < iteration - 1:
-            new_sample = x_range[np.argmax(ucb)]  # Select the next point based on UCB
-            new_result = function_obj(new_sample)
-            pool = np.append(pool, new_sample)
-            result = np.append(result, new_result)
-            plt.scatter(new_sample, new_result, color='green', label='New Points')
+            
+            plt.figure(figsize=(10, 6))
+        # Plot the black box function, surrogate function, previous points, and new points
+            plt.plot(xrange[0], ucb, color='red', linestyle='dashed', label='Surrogate Function')
+            plt.scatter([arr[0] for arr in pool], result, color='blue', label='Previous Points')
+            
+            for j, (lower, upper) in enumerate(boundaries): #random param
+                param[j] = np.random.uniform(lower, upper)
+            param[0] = xrange[0][np.argmax(ucb)]  # Select the next point based on UCB
+                
+            new_result = function_obj(param)
+            pool.append(param.copy())
+            result.append(new_result)
+            
+            plt.scatter(param[0], new_result, color='green', label='New Points')
+            plt.show()
     
+def bayesian_optimisation_single(iteration, initial_sample_size = 10,this_param = 0, special_boundaries = boundaries,pool = [],result = []):
+    
+    if (this_param <0 or this_param > len(parameter_name)-1):
+        print("wrong parameter number, parameters are ",parameter_name)
+        return 0
+    
+    print("optimising around parameter", parameter_name[this_param])
+    
+    the_range = xrange.copy()
+    
+    if len(pool) == 0 : 
+        param = np.zeros(8)
+        print("creating initial pool")
+        for j, (lower, upper) in enumerate(boundaries): #random param
+                param[j] = np.random.uniform(lower, upper)
+                if (j !=this_param):
+                    the_range[j] = np.linspace(param[j],param[j], 100)
+        
+        
+        for i in range(initial_sample_size):
+            param[this_param] = np.random.uniform(boundaries[this_param][0],boundaries[this_param][1])
+            pool.append(param.copy())
+            result.append(function_obj(param))
+            
+    print("running the algorithm")
+    # Gaussian process regressor with an RBF kernel
+    kernel = RBF(length_scale=1.0)
+    gp_model = GaussianProcessRegressor(kernel=kernel)
+    
+    for i in range(iteration):
+        print("iteration",i)
+        
+        # Fit the Gaussian process model to the sampled points
+        gp_model.fit(pool, result)
+        
+        # Generate the Upper Confidence Bound (UCB) using the Gaussian process model
+        ucb = upper_confidence_bound(the_range.T, gp_model, beta)
+        
+        plt.figure(figsize=(10, 6))
+        # Plot the black box function, surrogate function, previous points, and new points
+        plt.plot(the_range[this_param], ucb, color='red', linestyle='dashed', label='Surrogate Function')
+        plt.scatter([arr[this_param] for arr in pool], result, color='blue', label='Previous Points')
+        plt.show()
 
+        if i < iteration - 1:
+            
+            plt.figure(figsize=(10, 6))
+        # Plot the black box function, surrogate function, previous points, and new points
+            plt.plot(the_range[this_param], ucb, color='red', linestyle='dashed', label='Surrogate Function')
+            plt.scatter([arr[this_param] for arr in pool], result, color='blue', label='Previous Points')
+            
+            param[this_param] = the_range[this_param][np.argmax(ucb)]  # Select the next point based on UCB
+                
+            new_result = function_obj(param)
+            pool.append(param.copy())
+            result.append(new_result)
+            
+            plt.scatter(param[this_param], new_result, color='green', label='New Points')
+            plt.show()
+            
+    # Determine the point with the highest observed function value
+    best_idx = np.argmax(result)
+    best_x = pool[best_idx]
+    best_y = result[best_idx]
+    
+    print("Best solution:", best_x)
+    print("with result:", best_y)
+    return best_x
+    
+#this is not functional yet
+def bayesian_optimisation_multi(iteration, initial_sample_size = 10,params = [0], special_boundaries = boundaries,pool = [],result = []):
+    
+    if any(value > len(parameter_name)-1 or value < 0 for value in params):
+        print("wrong parameter number, parameters are ",parameter_name)
+        return 0
+    
+    print("optimising around parameter:")
+    for value in params :
+        print(parameter_name[value])
+        
+    the_range = xrange.copy()
+    
+    if len(pool) == 0 : 
+        param = np.zeros(8)
+        print("creating initial pool")
+        for j, (lower, upper) in enumerate(boundaries): #random param
+                param[j] = np.random.uniform(lower, upper)
+                if (j not in params):
+                    the_range[j] = np.linspace(param[j],param[j], 100)
+        
+        
+        for i in range(initial_sample_size):
+            for value in params : 
+                param[value] = np.random.uniform(boundaries[value][0],boundaries[value][1])
+            pool.append(param.copy())
+            result.append(function_obj(param))
+            
+    print("running the algorithm")
+    # Gaussian process regressor with an RBF kernel
+    kernel = RBF(length_scale=1.0)
+    gp_model = GaussianProcessRegressor(kernel=kernel)
+    
+    for i in range(iteration):
+        print("iteration",i)
+        
+        # Fit the Gaussian process model to the sampled points
+        gp_model.fit(pool, result)
+        
+        # Generate the Upper Confidence Bound (UCB) using the Gaussian process model
+        ucb = upper_confidence_bound(the_range.T, gp_model, beta)
+        
+        print("this ucb", ucb)
+        
+        # Create subplots
+        num_plots = len(params)
+        fig, axes = plt.subplots(1, num_plots, figsize=(10*num_plots, 6))
+
+        for i, value in enumerate(params):
+        # Plot for current value 
+            ax = axes[i] if num_plots > 1 else axes  # If only one plot, axes is not a list
+            ax.plot(the_range[value], ucb, color='red', linestyle='dashed', label='Surrogate Function')
+            ax.scatter([arr[value] for arr in pool], result, color='blue', label='Previous Points')
+            ax.set_title(f"Plot for this_param ="+parameter_name[value])
+
+        # Show the plots
+        plt.tight_layout()
+        plt.show()
+
+        if i < iteration - 1:
+            fig, axes = plt.subplots(1, num_plots, figsize=(10*num_plots, 6))
+            
+            for i, value in enumerate(params):
+        # Plot the black box function, surrogate function, previous points, and new points
+                ax = axes[i] if num_plots > 1 else axes  # If only one plot, axes is not a list
+                ax.plot(the_range[value], ucb, color='red', linestyle='dashed', label='Surrogate Function')
+                ax.scatter([arr[value] for arr in pool], result, color='blue', label='Previous Points')
+                ax.set_title(f"Plot for this_param ="+parameter_name[value])
+                
+                param[value] = the_range[value][np.argmax(ucb)]  # Select the next point based on UCB
+
+                new_result = function_obj(param)
+                pool.append(param.copy())
+                result.append(new_result)
+
+                plt.scatter(param[this_param], new_result, color='green', label='New Points')
+                plt.show()
+            
+    # Determine the point with the highest observed function value
+    best_idx = np.argmax(result)
+    best_x = pool[best_idx]
+    best_y = result[best_idx]
+    
+    print("Best solution:", best_x)
+    print("with result:", best_y)
+    return best_x
 
 def pca(sample, nb_component):
     
@@ -142,7 +321,7 @@ def pca(sample, nb_component):
         for j, (lower, upper) in enumerate(boundaries):
             param[j] = np.random.uniform(lower, upper)
             
-        df = pd.concat([df, pd.DataFrame([param],columns=column_names)], ignore_index=True)
+        df = pd.concat([df, pd.DataFrame([param.copy()],columns=column_names)], ignore_index=True)
         #df = df.append(pd.Series(param, index=df.columns), ignore_index=True)
         #robot = Model.model(Model.Parameters(param))
         #robot.simulate()

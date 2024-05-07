@@ -315,7 +315,7 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
         if switch == 2:
           switch = 1
           end_count += time_step
-          if end_count > 3*time_step:
+          if end_count > 4*time_step:  #change the coef to manipulate terminating cond
             switch = 3
             break
 
