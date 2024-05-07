@@ -239,7 +239,6 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
     jointInfo = p.getJointInfo(jumper, i)
     jointNameToId[jointInfo[1].decode('UTF-8')] = jointInfo[0]
     jointIndices[i] = jointInfo[0]
-    print(jointInfo)
 
   p.resetJointState(jumper, 0, -(rest_angle-compression))
   p.resetJointState(jumper, nJoints-1, np.pi-(rest_angle-compression))
@@ -259,6 +258,8 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
 
   time_step = 1/240
   counter = 0
+  start_count = 0
+  end_count = 0
   start = True
   switch = 0
   jump_distance = 0
@@ -271,8 +272,9 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
                                   cameraPitch=-20, 
                                   cameraTargetPosition=focus)
       counter += time_step
+      start_count += time_step
 
-      if counter < 0.5 and start:
+      if start_count < 0.5 and start:
         pass
       elif start:
         p.setRealTimeSimulation(0)
@@ -280,7 +282,7 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
           p.setJointMotorControl2(jumper, 
                                   jointIndex=id,
                                   controlMode=p.VELOCITY_CONTROL,
-                                  force=0.0008)
+                                  force=0.001)
           
           p.changeDynamics(jumper, 
                           id, 
@@ -288,8 +290,8 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
                           spinningFriction=0.8,
                           rollingFriction=0.8,
                           restitution=0.9,
-                          contactStiffness=0.1,
-                          contactDamping=0.1,
+                          #contactStiffness=0.1,
+                          #contactDamping=0,
                           frictionAnchor=0)
         start = False
       else:
@@ -307,18 +309,21 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
           if contact[1] == jumper and contact[2] == plane:
             if switch == 1:
                 switch = 2
-                #switch = 1
-            break
+                break
         if not contacts and switch == 0:
           switch = 1
         if switch == 2:
-          break
+          switch = 1
+          end_count += time_step
+          if end_count > 3*time_step:
+            switch = 3
+            break
 
         p.stepSimulation()
 
       time.sleep(0.015) # !!Comment out while optimizing!!
 
-  if switch == 2:
+  if switch == 3:
     final_pos_arr, _ = p.getBasePositionAndOrientation(jumper)
     jump_distance = np.sqrt(pow(final_pos_arr[0], 2) + pow(final_pos_arr[1], 2))
   
