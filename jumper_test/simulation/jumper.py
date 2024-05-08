@@ -329,6 +329,9 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
   
   energy = 0.5*stiffness*pow(motor_angle, 2)*np.pi/180
 
+  p.resetSimulation()
+  p.disconnect()
+
   return jump_distance, energy
 
 jump_distance, energy = simulate(l1=60, l2=100, l3=100, l4=60, l5=80, compression=40, rest_angle=60, stiffness=8/1000)
