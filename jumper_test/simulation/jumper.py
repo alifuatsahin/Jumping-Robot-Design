@@ -39,6 +39,12 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
 
   #CREATE COLLISION SHAPE
   #Base Link (link1)
+  # base_v = p.createVisualShape(shapeType=p.GEOM_MESH,
+  #                         fileName="../urdf/main_body.obj")
+
+  # base_c = p.createCollisionShape(shapeType=p.GEOM_MESH,
+  #                         fileName="../urdf/main_body.obj")
+
   base_v = p.createVisualShape(shapeType=p.GEOM_CAPSULE,
                           radius=t,
                           length=l1)
@@ -287,12 +293,9 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
           p.changeDynamics(jumper, 
                           id, 
                           lateralFriction=0.8,
-                          spinningFriction=0.8,
-                          rollingFriction=0.8,
-                          restitution=0.9,
-                          #contactStiffness=0.1,
-                          #contactDamping=0,
-                          frictionAnchor=0)
+                          spinningFriction=1.2,
+                          rollingFriction=1.2,
+                          restitution=0.9)
         start = False
       else:
         motor_angle = (p.getJointState(jumper, 0)[0] + rest_angle)*180/np.pi
@@ -315,7 +318,7 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
         if switch == 2:
           switch = 1
           end_count += time_step
-          if end_count > 4*time_step:  #change the coef to manipulate terminating cond
+          if end_count > 10*time_step:  #change the coef to manipulate terminating cond
             switch = 3
             break
 
