@@ -29,10 +29,16 @@ def function_obj(parameters):
     print("new model")
     robot = Model.model(Model.Parameters(parameters))
     robot.simulate()
-    return robot.max_length/robot.energy
+    
+    if robot.energy != 0.0 : 
+        return robot.max_length/robot.energy
+    else :
+        return 0.0
+
 # Define the boundaries
 
 parameter_name = ["l1", "l2", "l3", "l4", "l5", "compression", "rest_angle", "stiffness"]
+
 boundaries = np.array([
     [20, 150], #link
     [20, 150], 
@@ -56,11 +62,7 @@ xrange = np.array([
     np.linspace(boundaries[7][0],boundaries[7][1], 100) #spring
     ])
 
-# Set the value of beta for the UCB acquisition function
-beta = 2.0
-
-
-# genetic algorithm
+############ genetic algorithm ############ 
 
 def genetic_algorith(generation):
     print("algo")
@@ -85,21 +87,23 @@ def genetic_algorith(generation):
     print("Best solution:", best_solution)
     return best_solution
 
+
+############ Bayesian optimisation ############ 
+
+# Set the value of beta for the UCB acquisition function
+beta = 2.0
+
 def expected_improvement(x, gp_model, best_y):
     y_pred, y_std = gp_model.predict(x, return_std=True) #.reshape(-1, 1)
     z = (y_pred - best_y) / y_std
     ei = (y_pred - best_y) * norm.cdf(z) + y_std * norm.pdf(z)
     return ei
 
-def upper_confidence_bound(x, gp_model, beta):
-    y_pred, y_std = gp_model.predict(x, return_std=True)
-    ucb = y_pred + beta * y_std
-    return ucb
 
-
-def bayesian_optimisation(iteration, initial_sample_size = 10, special_boundaries = boundaries,pool = [],result = []):
+def bayesian_optimisation(iteration, initial_sample_size = 10, special_boundaries = boundaries,initialpool = [],result = []):
     
-    if len(pool) == 0 : 
+    if len(initialpool) == 0 :
+        pool = []
         param = np.zeros(8)
         print("creating initial pool")
         for i in range(initial_sample_size):
@@ -107,6 +111,8 @@ def bayesian_optimisation(iteration, initial_sample_size = 10, special_boundarie
                 param[j] = np.random.uniform(lower, upper)
             pool.append(param.copy())
             result.append(function_obj(param))
+    else : 
+        pool = initialpool.copy()
             
     print("algo")
     # Gaussian process regressor with an RBF kernel
@@ -150,8 +156,13 @@ def bayesian_optimisation(iteration, initial_sample_size = 10, special_boundarie
             
             plt.scatter(param[0], new_result, color='green', label='New Points')
             plt.show()
-    
-def bayesian_optimisation_single(iteration, initial_sample_size = 10,this_param = 0, special_boundaries = boundaries,pool = [],result = []):
+
+def upper_confidence_bound(x, gp_model, beta):
+    y_pred, y_std = gp_model.predict(x, return_std=True)
+    ucb = y_pred + beta * y_std
+    return ucb
+
+def bayesian_optimisation_single(iteration, initial_sample_size = 10,this_param = 0, special_boundaries = boundaries,initialpool = [],initialresult = []):
     
     if (this_param <0 or this_param > len(parameter_name)-1):
         print("wrong parameter number, parameters are ",parameter_name)
@@ -161,7 +172,10 @@ def bayesian_optimisation_single(iteration, initial_sample_size = 10,this_param 
     
     the_range = xrange.copy()
     
-    if len(pool) == 0 : 
+    
+    if len(initialpool) == 0 :
+        pool = []
+        result = []
         param = np.zeros(8)
         print("creating initial pool")
         for j, (lower, upper) in enumerate(boundaries): #random param
@@ -174,6 +188,9 @@ def bayesian_optimisation_single(iteration, initial_sample_size = 10,this_param 
             param[this_param] = np.random.uniform(boundaries[this_param][0],boundaries[this_param][1])
             pool.append(param.copy())
             result.append(function_obj(param))
+    else : 
+        pool = initialpool.copy()
+        result = initialresult.copy()
             
     print("running the algorithm")
     # Gaussian process regressor with an RBF kernel
@@ -219,93 +236,9 @@ def bayesian_optimisation_single(iteration, initial_sample_size = 10,this_param 
     print("Best solution:", best_x)
     print("with result:", best_y)
     return best_x
-    
-#this is not functional yet
-def bayesian_optimisation_multi(iteration, initial_sample_size = 10,params = [0], special_boundaries = boundaries,pool = [],result = []):
-    
-    if any(value > len(parameter_name)-1 or value < 0 for value in params):
-        print("wrong parameter number, parameters are ",parameter_name)
-        return 0
-    
-    print("optimising around parameter:")
-    for value in params :
-        print(parameter_name[value])
-        
-    the_range = xrange.copy()
-    
-    if len(pool) == 0 : 
-        param = np.zeros(8)
-        print("creating initial pool")
-        for j, (lower, upper) in enumerate(boundaries): #random param
-                param[j] = np.random.uniform(lower, upper)
-                if (j not in params):
-                    the_range[j] = np.linspace(param[j],param[j], 100)
-        
-        
-        for i in range(initial_sample_size):
-            for value in params : 
-                param[value] = np.random.uniform(boundaries[value][0],boundaries[value][1])
-            pool.append(param.copy())
-            result.append(function_obj(param))
-            
-    print("running the algorithm")
-    # Gaussian process regressor with an RBF kernel
-    kernel = RBF(length_scale=1.0)
-    gp_model = GaussianProcessRegressor(kernel=kernel)
-    
-    for i in range(iteration):
-        print("iteration",i)
-        
-        # Fit the Gaussian process model to the sampled points
-        gp_model.fit(pool, result)
-        
-        # Generate the Upper Confidence Bound (UCB) using the Gaussian process model
-        ucb = upper_confidence_bound(the_range.T, gp_model, beta)
-        
-        print("this ucb", ucb)
-        
-        # Create subplots
-        num_plots = len(params)
-        fig, axes = plt.subplots(1, num_plots, figsize=(10*num_plots, 6))
 
-        for i, value in enumerate(params):
-        # Plot for current value 
-            ax = axes[i] if num_plots > 1 else axes  # If only one plot, axes is not a list
-            ax.plot(the_range[value], ucb, color='red', linestyle='dashed', label='Surrogate Function')
-            ax.scatter([arr[value] for arr in pool], result, color='blue', label='Previous Points')
-            ax.set_title(f"Plot for this_param ="+parameter_name[value])
 
-        # Show the plots
-        plt.tight_layout()
-        plt.show()
-
-        if i < iteration - 1:
-            fig, axes = plt.subplots(1, num_plots, figsize=(10*num_plots, 6))
-            
-            for i, value in enumerate(params):
-        # Plot the black box function, surrogate function, previous points, and new points
-                ax = axes[i] if num_plots > 1 else axes  # If only one plot, axes is not a list
-                ax.plot(the_range[value], ucb, color='red', linestyle='dashed', label='Surrogate Function')
-                ax.scatter([arr[value] for arr in pool], result, color='blue', label='Previous Points')
-                ax.set_title(f"Plot for this_param ="+parameter_name[value])
-                
-                param[value] = the_range[value][np.argmax(ucb)]  # Select the next point based on UCB
-
-                new_result = function_obj(param)
-                pool.append(param.copy())
-                result.append(new_result)
-
-                plt.scatter(param[this_param], new_result, color='green', label='New Points')
-                plt.show()
-            
-    # Determine the point with the highest observed function value
-    best_idx = np.argmax(result)
-    best_x = pool[best_idx]
-    best_y = result[best_idx]
-    
-    print("Best solution:", best_x)
-    print("with result:", best_y)
-    return best_x
+############ PCA ############ 
 
 def pca(sample, nb_component):
     
@@ -332,7 +265,8 @@ def pca(sample, nb_component):
     print(df)
     print(result)
     print("apply PCA")
-    scaler = MinMaxScaler()
+    #scaler = MinMaxScaler()
+    scaler = StandardScaler()
     scaled_df = scaler.fit_transform(df)
 
     # Perform PCA
@@ -353,6 +287,7 @@ def biplot(principal_components,result, pca, labels=None, label_size=10, arrow_l
     # Plot data points
     
     #scaler = MinMaxScaler()
+    #scaler = StandardScaler()
     #result = scaler.fit_transform(result) #better for visualisation)
     
     plt.scatter(principal_components[:, 0], principal_components[:, 1],c=result.iloc[:, 0], cmap='viridis', alpha=0.5)
@@ -373,6 +308,7 @@ def biplot(principal_components,result, pca, labels=None, label_size=10, arrow_l
 def pca_plot(PC,result):
     
     #scaler = MinMaxScaler()
+    #scaler = StandardScaler()
     #result = scaler.fit_transform(result) #better for visualisation)
     
     

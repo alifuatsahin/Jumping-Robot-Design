@@ -34,9 +34,24 @@ class model():
     energy = 0
     
     def __init__(self, parameters):
+        #print("init")
         self.parameters = parameters
+        self.jump = []
+        self.length = []
+        self.max_high = 0
+        self.max_length = 0
+        self.energy = 0 
 
     def simulate(self,visualisation = False):
+        
+        time_step = 1/240
+        counter = 0
+        start_count = 0
+        end_count = 0
+        start = True
+        switch = 0
+        time_limit = 5 #seconds
+    
         print("start simulation")
         self.jump = []
         self.length = []
@@ -298,15 +313,7 @@ class model():
 
         p.setGravity(0, 0, -9.81)
         p.setRealTimeSimulation(1)
-
-        time_step = 1/240
-        counter = 0
-        start_count = 0
-        end_count = 0
-        start = True
-        switch = 0
-        jump_distance = 0
-        time_limit = 5 #seconds
+        
         
         while counter < time_limit:
             focus, _ = p.getBasePositionAndOrientation(jumper)
@@ -366,7 +373,7 @@ class model():
 
                 p.stepSimulation()
 
-            #time.sleep(0.015) # !!Comment out while optimizing!!
+                #time.sleep(0.015) # !!Comment out while optimizing!!
 
         if switch == 3:
             final_pos_arr, _ =   p.getBasePositionAndOrientation(jumper)
@@ -386,19 +393,29 @@ class model():
         if (self.jump == []):
             self.simulate()
         # Plot the curve
-        plt.plot(np.arange(len(self.jump)), self.jump)
-        plt.xlabel('Index')
-        plt.ylabel('Value')
-        plt.title('Random Curve')
+        plt.plot(self.length, self.jump)
+        plt.xlabel('length')
+        plt.ylabel('high')
+        plt.title('jump')
         plt.grid(True)
         plt.show()
         
+        #if (self.jump == []):
+        #    self.simulate()
         # Plot the curve
-        plt.plot(np.arange(len(self.length)), self.length)
-        plt.xlabel('Index')
-        plt.ylabel('Value')
-        plt.title('Random Curve')
-        plt.grid(True)
-        plt.show()
+        #plt.plot(np.arange(len(self.jump)), self.jump)
+        #plt.xlabel('Index')
+        #plt.ylabel('Value')
+        #plt.title('jump ')
+        #plt.grid(True)
+        #plt.show()
+        
+        # Plot the curve
+        #plt.plot(np.arange(len(self.length)), self.length)
+        #plt.xlabel('Index')
+        #plt.ylabel('Value')
+        #plt.title('Random Curve')
+        #plt.grid(True)
+        #plt.show()
         
         
