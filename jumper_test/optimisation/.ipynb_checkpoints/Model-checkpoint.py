@@ -22,7 +22,7 @@ class Parameters:
         self.friction = friction #friction
         self.t = thickness
         
-    def to_array():
+    def to_array(self):
         return[self.l1,self.l2,self.l3,self.l4,self.l5,self.compression,self.rest,self.stiffness]
    
 
@@ -143,7 +143,7 @@ class model():
         jointTypes.append(l2_joint)
         axis.append(l2_joint_axis)
 
-      #Link3
+        #Link3
         l3_v = p.createVisualShape(shapeType=p.GEOM_CAPSULE,
                               radius=t,
                               length=l3,
@@ -207,7 +207,7 @@ class model():
         jointTypes.append(l4_joint)
         axis.append(l4_joint_axis)
 
-      #Link5_1
+        #Link5_1
         l51_v = p.createVisualShape(shapeType=p.GEOM_CAPSULE,
                               radius=t,
                               length=l5,
@@ -239,7 +239,7 @@ class model():
         jointTypes.append(l51_joint)
         axis.append(l51_joint_axis)
 
-      #Link5_2
+        #Link5_2
         l52_v = p.createVisualShape(shapeType=p.GEOM_CAPSULE,
                               radius=t,
                               length=l5,
@@ -379,9 +379,12 @@ class model():
             final_pos_arr, _ =   p.getBasePositionAndOrientation(jumper)
             #self.max_dist = np.sqrt(pow(final_pos_arr[0], 2) + pow(final_pos_arr[1], 2))
             self.max_high = max(self.jump)
-            self.max_length = max(np.abs(self.length))
+            self.max_length = max(self.length)
   
         self.energy = 0.5*stiffness*pow(motor_angle, 2)*np.pi/180
+
+        p.resetSimulation()
+        p.disconnect()
                 
         #print(switch)
         print("max high",np.round(self.max_high,2),"[m] max distance",np.round(self.max_length,2),"[m] energy ",np.round(self.energy,2),"J")

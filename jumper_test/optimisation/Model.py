@@ -379,7 +379,7 @@ class model():
             final_pos_arr, _ =   p.getBasePositionAndOrientation(jumper)
             #self.max_dist = np.sqrt(pow(final_pos_arr[0], 2) + pow(final_pos_arr[1], 2))
             self.max_high = max(self.jump)
-            self.max_length = max(np.abs(self.length))
+            self.max_length = max(self.length)
   
         self.energy = 0.5*stiffness*pow(motor_angle, 2)*np.pi/180
 
