@@ -334,12 +334,12 @@ class model():
                                   controlMode=p.VELOCITY_CONTROL,
                                   force=0.001)
           
-                    p.changeDynamics(jumper, 
-                          id, 
-                          lateralFriction=0.8,
-                          spinningFriction=1.2,
-                          rollingFriction=1.2,
-                          restitution=0.9)
+                    # p.changeDynamics(jumper, 
+                    #       id, 
+                    #       lateralFriction=0.8,
+                    #       spinningFriction=1.2,
+                    #       rollingFriction=1.2,
+                    #       restitution=0.9)
                 start = False
             else:
                 self.jump.append(focus[2])

@@ -290,12 +290,12 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
                                   controlMode=p.VELOCITY_CONTROL,
                                   force=0.001)
           
-          p.changeDynamics(jumper, 
-                          id, 
-                          lateralFriction=0.8,
-                          spinningFriction=1.2,
-                          rollingFriction=1.2,
-                          restitution=0.9)
+          # p.changeDynamics(jumper, 
+          #                 id, 
+          #                 lateralFriction=0.8,
+          #                 spinningFriction=1.2,
+          #                 rollingFriction=1.2,
+          #                 restitution=0.9)
         start = False
       else:
         motor_angle = (p.getJointState(jumper, 0)[0] + rest_angle)*180/np.pi
