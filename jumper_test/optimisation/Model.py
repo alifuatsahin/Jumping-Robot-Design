@@ -50,7 +50,7 @@ class model():
         end_count = 0
         start = True
         switch = 0
-        time_limit = 5 #seconds
+        time_limit = 10 #seconds
     
         print("start simulation")
         self.jump = []
@@ -337,12 +337,9 @@ class model():
                     p.changeDynamics(jumper, 
                           id, 
                           lateralFriction=0.8,
-                          spinningFriction=0.8,
-                          rollingFriction=0.8,
-                          restitution=0.9,
-                          #contactStiffness=0.1,
-                          #contactDamping=0,
-                          frictionAnchor=0)
+                          spinningFriction=1.2,
+                          rollingFriction=1.2,
+                          restitution=0.9)
                 start = False
             else:
                 self.jump.append(focus[2])

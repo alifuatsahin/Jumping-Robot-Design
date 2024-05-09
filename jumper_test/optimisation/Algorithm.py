@@ -30,7 +30,7 @@ def function_obj(parameters):
     robot = Model.model(Model.Parameters(parameters))
     robot.simulate()
     
-    if robot.energy < 1e-8 : #!= 0.0 : not 0 
+    if robot.energy > 1e-8 : #!= 0.0 : not 0 
         return robot.max_length #/robot.energy
     else :
         return 0.0
