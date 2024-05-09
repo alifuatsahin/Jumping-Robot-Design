@@ -42,7 +42,7 @@ class model():
         self.max_length = 0
         self.energy = 0 
 
-    def simulate(self,visualisation = False):
+    def simulate(self, visualisation = False):
         
         time_step = 1/240
         counter = 0
@@ -317,8 +317,6 @@ class model():
         
         while counter < time_limit:
             focus, _ = p.getBasePositionAndOrientation(jumper)
-            self.jump.append(focus[2])
-            self.length.append(focus[1])
             p.resetDebugVisualizerCamera(cameraDistance=0.5, 
                                   cameraYaw=75, 
                                   cameraPitch=-20, 
@@ -347,13 +345,15 @@ class model():
                           frictionAnchor=0)
                 start = False
             else:
+                self.jump.append(focus[2])
+                self.length.append(focus[1])
                 motor_angle = (p.getJointState(jumper, 0)[0] + rest_angle)*180/np.pi
         
                 p.setJointMotorControl2(jumper,
-          jointIndex=0,
-          controlMode=p.TORQUE_CONTROL,
-          force=-motor_angle*stiffness,
-          )
+                                        jointIndex=0,
+                                        controlMode=p.TORQUE_CONTROL,
+                                        force=-motor_angle*stiffness,
+                                        )
         
                 contacts = p.getContactPoints(jumper, plane)
 
@@ -367,13 +367,14 @@ class model():
                 if switch == 2:
                     switch = 1
                     end_count += time_step
-                    if end_count > 4*time_step:  #change the coef to manipulate terminating cond
+                    if end_count > 10*time_step:  #change the coef to manipulate terminating cond
                         switch = 3
                         break
 
                 p.stepSimulation()
 
-                #time.sleep(0.015) # !!Comment out while optimizing!!
+            if visualisation:
+                time.sleep(0.015) # !!Comment out while optimizing!!
 
         if switch == 3:
             final_pos_arr, _ =   p.getBasePositionAndOrientation(jumper)
