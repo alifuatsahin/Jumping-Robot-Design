@@ -40,12 +40,12 @@ def function_obj(parameters):
 parameter_name = ["l1", "l2", "l3", "l4", "l5", "compression", "rest_angle", "stiffness"]
 
 boundaries = np.array([
-    [20, 150], #link
-    [20, 150], 
+    [20, 50], #link
+    [50, 150], 
+    [50, 150],
+    [20, 50],
     [20, 150],
-    [20, 150],
-    [20, 150],
-    [5, 30], #compression
+    [5, 40], #compression
     [10, 80], #rest
     [1.5, 14] #spring
     ])
