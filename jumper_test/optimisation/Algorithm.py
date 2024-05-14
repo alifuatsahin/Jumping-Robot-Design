@@ -29,9 +29,10 @@ def function_obj(parameters):
     print("new model")
     robot = Model.model(Model.Parameters(parameters))
     robot.simulate()
+    max_length = max(robot.parameters.l1,robot.parameters.l2,robot.parameters.l3,robot.parameters.l4,robot.parameters.l5)
     
     if robot.energy > 1e-8 : #!= 0.0 : not 0 
-        return robot.max_length #/robot.energy
+        return (robot.max_length/max_length)#*(robot.energy)
     else :
         return 0.0
 

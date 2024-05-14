@@ -42,7 +42,7 @@ class model():
         self.max_length = 0
         self.energy = 0 
 
-    def simulate(self,visualisation = False):
+    def simulate(self, visualisation = False):
         
         time_step = 1/240
         counter = 0
@@ -50,7 +50,7 @@ class model():
         end_count = 0
         start = True
         switch = 0
-        time_limit = 5 #seconds
+        time_limit = 10 #seconds
     
         print("start simulation")
         self.jump = []
@@ -317,8 +317,6 @@ class model():
         
         while counter < time_limit:
             focus, _ = p.getBasePositionAndOrientation(jumper)
-            self.jump.append(focus[2])
-            self.length.append(focus[1])
             p.resetDebugVisualizerCamera(cameraDistance=0.5, 
                                   cameraYaw=75, 
                                   cameraPitch=-20, 
@@ -336,24 +334,23 @@ class model():
                                   controlMode=p.VELOCITY_CONTROL,
                                   force=0.001)
           
-                    p.changeDynamics(jumper, 
-                          id, 
-                          lateralFriction=0.8,
-                          spinningFriction=0.8,
-                          rollingFriction=0.8,
-                          restitution=0.9,
-                          #contactStiffness=0.1,
-                          #contactDamping=0,
-                          frictionAnchor=0)
+                    # p.changeDynamics(jumper, 
+                    #       id, 
+                    #       lateralFriction=0.8,
+                    #       spinningFriction=1.2,
+                    #       rollingFriction=1.2,
+                    #       restitution=0.9)
                 start = False
             else:
+                self.jump.append(focus[2])
+                self.length.append(focus[1])
                 motor_angle = (p.getJointState(jumper, 0)[0] + rest_angle)*180/np.pi
         
                 p.setJointMotorControl2(jumper,
-          jointIndex=0,
-          controlMode=p.TORQUE_CONTROL,
-          force=-motor_angle*stiffness,
-          )
+                                        jointIndex=0,
+                                        controlMode=p.TORQUE_CONTROL,
+                                        force=-motor_angle*stiffness,
+                                        )
         
                 contacts = p.getContactPoints(jumper, plane)
 
@@ -367,13 +364,15 @@ class model():
                 if switch == 2:
                     switch = 1
                     end_count += time_step
-                    if end_count > 4*time_step:  #change the coef to manipulate terminating cond
+                    if end_count > 10*time_step:  #change the coef to manipulate terminating cond
                         switch = 3
                         break
 
+                #if not visualisation :
                 p.stepSimulation()
 
-                #time.sleep(0.015) # !!Comment out while optimizing!!
+            if visualisation:
+                time.sleep(0.005) # !!Comment out while optimizing!!
 
         if switch == 3:
             final_pos_arr, _ =   p.getBasePositionAndOrientation(jumper)
@@ -393,6 +392,7 @@ class model():
         
     
     def plot(self):
+        plt.figure()
         if (self.jump == []):
             self.simulate()
         # Plot the curve
@@ -403,22 +403,24 @@ class model():
         plt.grid(True)
         plt.show()
         
-        #if (self.jump == []):
-        #    self.simulate()
+        plt.figure()
+        if (self.jump == []):
+            self.simulate()
         # Plot the curve
-        #plt.plot(np.arange(len(self.jump)), self.jump)
-        #plt.xlabel('Index')
-        #plt.ylabel('Value')
-        #plt.title('jump ')
-        #plt.grid(True)
-        #plt.show()
+        plt.plot(np.arange(len(self.jump)), self.jump)
+        plt.xlabel('time')
+        plt.ylabel('high')
+        plt.title('jump ')
+        plt.grid(True)
+        plt.show()
         
+        plt.figure()
         # Plot the curve
-        #plt.plot(np.arange(len(self.length)), self.length)
-        #plt.xlabel('Index')
-        #plt.ylabel('Value')
-        #plt.title('Random Curve')
-        #plt.grid(True)
-        #plt.show()
+        plt.plot(np.arange(len(self.length)), self.length)
+        plt.xlabel('distance')
+        plt.ylabel('Value')
+        plt.title('Jump')
+        plt.grid(True)
+        plt.show()
         
         

@@ -368,10 +368,11 @@ class model():
                         switch = 3
                         break
 
+                #if not visualisation :
                 p.stepSimulation()
 
             if visualisation:
-                time.sleep(0.015) # !!Comment out while optimizing!!
+                time.sleep(0.005) # !!Comment out while optimizing!!
 
         if switch == 3:
             final_pos_arr, _ =   p.getBasePositionAndOrientation(jumper)
@@ -391,6 +392,7 @@ class model():
         
     
     def plot(self):
+        plt.figure()
         if (self.jump == []):
             self.simulate()
         # Plot the curve
@@ -401,22 +403,24 @@ class model():
         plt.grid(True)
         plt.show()
         
-        #if (self.jump == []):
-        #    self.simulate()
+        plt.figure()
+        if (self.jump == []):
+            self.simulate()
         # Plot the curve
-        #plt.plot(np.arange(len(self.jump)), self.jump)
-        #plt.xlabel('Index')
-        #plt.ylabel('Value')
-        #plt.title('jump ')
-        #plt.grid(True)
-        #plt.show()
+        plt.plot(np.arange(len(self.jump)), self.jump)
+        plt.xlabel('time')
+        plt.ylabel('high')
+        plt.title('jump ')
+        plt.grid(True)
+        plt.show()
         
+        plt.figure()
         # Plot the curve
-        #plt.plot(np.arange(len(self.length)), self.length)
-        #plt.xlabel('Index')
-        #plt.ylabel('Value')
-        #plt.title('Random Curve')
-        #plt.grid(True)
-        #plt.show()
+        plt.plot(np.arange(len(self.length)), self.length)
+        plt.xlabel('distance')
+        plt.ylabel('Value')
+        plt.title('Jump')
+        plt.grid(True)
+        plt.show()
         
         
