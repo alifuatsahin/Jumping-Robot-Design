@@ -3,21 +3,27 @@ import numpy as np
 import time
 import pybullet as p
 
-def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
+def simulate(l1, l2, l5, compression, rest_angle, stiffness, link_angle):
   p.connect(p.GUI) #or p.DIRECT to simulate faster
 
   #Create Plane
   plane = p.createCollisionShape(p.GEOM_PLANE)
   p.createMultiBody(0, 0)
-  p.changeDynamics(plane, -1, lateralFriction=0.8)
+  p.changeDynamics(plane, -1, lateralFriction=1.5)
 
   #Link Lengths [m]
+  # l4 = l1 + l4diff
+  # beta = np.pi/180*beta
+  # l3diff = np.sqrt(pow(l1,2) + pow(l4,2) - 2*l1*l4*np.cos(beta))
+  # l3 = l2 - l3diff
+
   l1 = l1/1000
   l2 = l2/1000
-  l3 = l3/1000
-  l4 = l4/1000
+  l3 = l2/1000
+  l4 = l1/1000
   l5 = l5/1000
   t = 4/1000
+  link_angle = np.pi/180*link_angle
   rest_angle = rest_angle*np.pi/180
   compression = compression*np.pi/180
 
@@ -52,7 +58,15 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
   base_c = p.createCollisionShape(shapeType=p.GEOM_CAPSULE,
                           radius=t,
                           height=l1)
-
+  
+  # base_v = p.createVisualShape(shapeType=p.GEOM_BOX,
+  #                         halfExtents=[50/1000, 62/1000, 148/1000],
+  #                         rgbaColor = [0, 1, 0, 1]
+  #                         )
+  
+  # base_c = p.createCollisionShape(shapeType=p.GEOM_BOX,
+  #                         halfExtents=[50/1000, 62/1000, 148/1000])
+                               
   basePos = [0, 0, l2] #[x,y,z]
   base_orientation = [np.sqrt(2)/2, 0, 0, np.sqrt(2)/2] #quaternion [x,y,z,w]
   base_i_pos = [0, 0, 0]
@@ -169,7 +183,7 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
                           collisionFramePosition=[0,0,l5/2])
 
   l51_pos = [0, 0, l4] #[x,y,z]
-  l51_orientation = [0, np.sin(np.pi/6), 0, np.cos(np.pi/6)] #quaternion [x,y,z,w]
+  l51_orientation = [0, np.sin(link_angle/2), 0, np.cos(link_angle/2)] #quaternion [x,y,z,w]
   l51_i_pos = [0, 0, 0]
   l51_i_orientation = [0, 0, 0, 1]
   l51_parent = 3
@@ -201,7 +215,7 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
                           collisionFramePosition=[0,0,l5/2])
 
   l52_pos = [0, 0, l4] #[x,y,z]
-  l52_orientation = [0, -np.sin(np.pi/12), 0, np.cos(np.pi/12)] #quaternion [x,y,z,w]
+  l52_orientation = [0, -np.sin(link_angle/2), 0, np.cos(link_angle/2)] #quaternion [x,y,z,w]
   l52_i_pos = [0, 0, 0]
   l52_i_orientation = [0, 0, 0, 1]
   l52_parent = 3
@@ -288,7 +302,7 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
           p.setJointMotorControl2(jumper, 
                                   jointIndex=id,
                                   controlMode=p.VELOCITY_CONTROL,
-                                  force=0.001)
+                                  force=0.005)
           
           # p.changeDynamics(jumper, 
           #                 id, 
@@ -337,7 +351,7 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness):
 
   return jump_distance, energy
 
-jump_distance, energy = simulate(l1=60, l2=100, l3=100, l4=60, l5=80, compression=40, rest_angle=60, stiffness=8/1000)
+jump_distance, energy = simulate(l1=50, l2=120, l5=150, compression=30, rest_angle=60, stiffness=8/1000, link_angle=30)
 
 print("Jump Distance: ", jump_distance)
 print("Energy: ", energy)

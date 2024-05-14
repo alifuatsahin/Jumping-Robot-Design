@@ -38,17 +38,16 @@ def function_obj(parameters):
 
 # Define the boundaries
 
-parameter_name = ["l1", "l2", "l3", "l4", "l5", "compression", "rest_angle", "stiffness"]
+parameter_name = ["l1", "l2", "l5", "compression", "rest_angle", "stiffness", "link_angle"]
 
 boundaries = np.array([
-    [20, 50], #link
-    [50, 150], 
-    [50, 150],
-    [20, 50],
-    [20, 150],
+    [30, 60], #link
+    [70, 170], 
+    [50, 170],
     [5, 40], #compression
     [10, 80], #rest
-    [1.5, 14] #spring
+    [1.5, 14], #spring
+    [10, 80] #link_angle
     ])
 
 #this is not beautiful but it is working
@@ -59,8 +58,7 @@ xrange = np.array([
     np.linspace(boundaries[3][0],boundaries[3][1], 100),
     np.linspace(boundaries[4][0],boundaries[4][1], 100),
     np.linspace(boundaries[5][0],boundaries[5][1], 100), #compression
-    np.linspace(boundaries[6][0],boundaries[6][1], 100), #rest
-    np.linspace(boundaries[7][0],boundaries[7][1], 100) #spring
+    np.linspace(boundaries[6][0],boundaries[6][1], 100) #rest #spring
     ])
 
 ############ genetic algorithm ############ 
@@ -71,7 +69,7 @@ def genetic_algorith(generation):
                            num_parents_mating=5,
                            fitness_func=obj,
                            sol_per_pop=10,
-                           num_genes=8,
+                           num_genes=7,
                            gene_space=boundaries,
                            parent_selection_type="sss",
                            keep_parents=2,
