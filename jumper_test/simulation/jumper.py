@@ -19,8 +19,8 @@ def simulate(l1, l2, l5, compression, rest_angle, stiffness, link_angle):
 
   l1 = l1/1000
   l2 = l2/1000
-  l3 = l2/1000
-  l4 = l1/1000
+  l3 = l2
+  l4 = l1
   l5 = l5/1000
   t = 4/1000
   link_angle = np.pi/180*link_angle
@@ -351,7 +351,7 @@ def simulate(l1, l2, l5, compression, rest_angle, stiffness, link_angle):
 
   return jump_distance, energy
 
-jump_distance, energy = simulate(l1=50, l2=120, l5=150, compression=30, rest_angle=60, stiffness=8/1000, link_angle=30)
+jump_distance, energy = simulate(l1=40, l2=100, l5=60, compression=30, rest_angle=60, stiffness=8/1000, link_angle=30)
 
 print("Jump Distance: ", jump_distance)
 print("Energy: ", energy)
