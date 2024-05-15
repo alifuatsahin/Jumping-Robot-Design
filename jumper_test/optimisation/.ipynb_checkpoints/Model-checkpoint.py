@@ -11,12 +11,13 @@ class Parameters:
     def __init__(self, x,  friction = 1.3,density = 1.2, thickness = 6):
         self.l1 = x[0]
         self.l2 = x[1]
-        self.l3 = x[2]
-        self.l4 = x[3]
-        self.l5 = x[4]
-        self.compression = x[5]
-        self.rest = x[6]
-        self.stiffness = x[7]
+        self.l3 = x[1]
+        self.l4 = x[0]
+        self.l5 = x[2]
+        self.compression = x[3]
+        self.rest = x[4]
+        self.stiffness = x[5]
+        self.link_angle = x[6]
         
         self.density = density
         self.friction = friction #friction
@@ -78,6 +79,7 @@ class model():
         t = self.parameters.t/1000
         rest_angle = self.parameters.rest*np.pi/180
         compression = self.parameters.compression*np.pi/180
+        link_angle = self.parameters.link_angle*np.pi/180
 
         #Material Parameters
         density = self.parameters.density*1000 #kg/m3
@@ -220,7 +222,7 @@ class model():
                               collisionFramePosition=[0,0,l5/2])
 
         l51_pos = [0, 0, l4] #[x,y,z]
-        l51_orientation = [0, np.sin(np.pi/6), 0, np.cos(np.pi/6)] #quaternion [x,y,z,w]
+        l51_orientation = [0, np.sin(link_angle/2), 0, np.cos(link_angle/2)] #quaternion [x,y,z,w]
         l51_i_pos = [0, 0, 0]
         l51_i_orientation = [0, 0, 0, 1]
         l51_parent = 3
@@ -252,7 +254,7 @@ class model():
                               collisionFramePosition=[0,0,l5/2])
 
         l52_pos = [0, 0, l4] #[x,y,z]
-        l52_orientation = [0, -np.sin(np.pi/12), 0, np.cos(np.pi/12)] #quaternion [x,y,z,w]
+        l52_orientation = [0, -np.sin(link_angle/2), 0, np.cos(link_angle/2)] #quaternion [x,y,z,w]
         l52_i_pos = [0, 0, 0]
         l52_i_orientation = [0, 0, 0, 1]
         l52_parent = 3
@@ -386,7 +388,7 @@ class model():
         p.disconnect()
                 
         #print(switch)
-        print("max high",np.round(self.max_high,2),"[m] max distance",np.round(self.max_length,2),"[m] energy ",np.round(self.energy,2),"J")
+        print("max high",np.round(self.max_high,3),"[m] max distance",np.round(self.max_length,3),"[m] energy ",np.round(self.energy,4),"J")
     
 
         

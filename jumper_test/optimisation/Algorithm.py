@@ -76,7 +76,8 @@ def genetic_algorith(generation):
                            crossover_type="single_point",
                            mutation_type="random",
                            mutation_percent_genes=None,
-                           mutation_num_genes=1)
+                           mutation_num_genes=1,
+                          save_solutions=True)
 
     # Run the genetic algorithm
     ga_instance.run()
@@ -84,6 +85,11 @@ def genetic_algorith(generation):
     # Get the best solution found by the genetic algorithm
     best_solution = ga_instance.best_solution()
     print("Best solution:", best_solution)
+    
+    # https://pygad.readthedocs.io/en/latest/pygad.html#plotting-methods-in-pygad-ga-class
+    ga_instance.plot_fitness()
+    #ga_instance.plot_genes()
+    ga_instance.plot_new_solution_rate()
     return best_solution
 
 

@@ -388,7 +388,7 @@ class model():
         p.disconnect()
                 
         #print(switch)
-        print("max high",np.round(self.max_high,2),"[m] max distance",np.round(self.max_length,2),"[m] energy ",np.round(self.energy,2),"J")
+        print("max high",np.round(self.max_high,3),"[m] max distance",np.round(self.max_length,3),"[m] energy ",np.round(self.energy,4),"J")
     
 
         
