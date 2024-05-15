@@ -1,0 +1,13 @@
+For GA, with 1000 generation
+
+[60., 70., 50., 40., 80., 14., 10.]
+max high 0.592 [m] max distance 2.644 [m] energy  0.0304 J
+max high 0.593 [m] max distance 2.645 [m] energy  0.0305 J
+max high 0.593 [m] max distance 2.646 [m] energy  0.0307 J
+
+
+[60., 70., 50., 40., 80., 14., 10.]
+same ! 
+
+[60., 70., 50., 40., 80., 14., 10.]
+same ! 
