@@ -1,3 +1,5 @@
+
+
 import numpy as np
 import Model #import the simulation and the model
 import pandas as pd
@@ -8,6 +10,9 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 from scipy.stats import norm
+  
+# importing required libraries 
+from mpl_toolkits.mplot3d import Axes3D  
 
 #genetic algorithms
 
@@ -187,8 +192,12 @@ def bayesian_optimisation(iteration, initial_sample_size = 10,params = [0], spec
                 
                 Range1 = np.linspace(special_boundaries[params[0]][0], special_boundaries[params[0]][1], 100)
                 Range2 = np.linspace(special_boundaries[params[1]][0], special_boundaries[params[1]][1], 100)
+                Range1_grid, Range2_grid = np.meshgrid(Range1, Range2)
+                ucb_plotting = np.array(ucb).reshape(Range1_grid.shape)
         # Plot the black box function, surrogate function, previous points, and new points
-                ax.plot_surface(Range1, Range2, ucb, color='red', alpha=0.5,label='Surrogate Function')
+                surface = ax.plot_surface(Range1_grid, Range2_grid, ucb_plotting, cmap='viridis', alpha=0.5,label='Surrogate Function')
+                fig.colorbar(surface, ax=ax, shrink=0.5, aspect=5, label='UCB Value')
+
                 ax.scatter([arr[params[0]] for arr in pool], [arr[params[1]] for arr in pool], result, color='blue', label='Previous Points')
                 plt.show()
 
@@ -206,8 +215,11 @@ def bayesian_optimisation(iteration, initial_sample_size = 10,params = [0], spec
                 
                 Range1 = np.linspace(special_boundaries[params[0]][0], special_boundaries[params[0]][1], 100)
                 Range2 = np.linspace(special_boundaries[params[1]][0], special_boundaries[params[1]][1], 100)
+                Range1_grid, Range2_grid = np.meshgrid(Range1, Range2)
+                ucb_plotting = np.array(ucb).reshape(Range1_grid.shape)
             # Plot the black box function, surrogate function, previous points, and new points
-                ax.plot_surface(Range1, Range2, ucb, color='red', alpha=0.5)
+                surface = ax.plot_surface(Range1_grid, Range2_grid, ucb_plotting, cmap='viridis', alpha=0.5,label='Surrogate Function')
+                fig.colorbar(surface, ax=ax, shrink=0.5, aspect=5, label='UCB Value')
                 ax.scatter([arr[params[0]] for arr in pool], [arr[params[1]] for arr in pool], result, color='blue', label='Previous Points')
 
                 # Select the next point based on UCB
@@ -222,7 +234,7 @@ def bayesian_optimisation(iteration, initial_sample_size = 10,params = [0], spec
                 plt.show()
 
             elif len(params) == 2:
-                ax.scatter(best_combination[params[0]], best_combination[params[1]], new_result, color='green', label='New Points')
+                ax.scatter(best_combination[params[0]], best_combination[params[1]], new_result, color='red', label='New Points')
                 plt.show()
             
     # Determine the point with the highest observed function value
