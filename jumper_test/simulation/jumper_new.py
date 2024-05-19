@@ -2,7 +2,7 @@ import numpy as np
 import time
 import pybullet as p
 
-def simulate(l2, l3_c, l4, l5_c, compression_ratio, rest_angle, stiffness, link_angle):
+def simulate(l2, l3_c, l4_c, l5_c, compression_ratio, rest_angle, stiffness, link_angle):
 
     p.connect(p.GUI)
 
@@ -13,9 +13,10 @@ def simulate(l2, l3_c, l4, l5_c, compression_ratio, rest_angle, stiffness, link_
     # Parameters
     link_angle = link_angle*np.pi/180
     rest_angle = rest_angle*np.pi/180
-    t = 4
+    t = 5
 
     l3 = l3_c*l2
+    l4 = l4_c*l2
     l5 = l5_c*l2
 
     if l3 != l2:
@@ -25,8 +26,7 @@ def simulate(l2, l3_c, l4, l5_c, compression_ratio, rest_angle, stiffness, link_
         beta = 0
         l1 = l4
 
-    compression = compression_ratio*rest_angle
-    print(compression*180/np.pi)
+    compression = compression_ratio*(rest_angle + beta)
 
     l1 = l1/1000
     l2 = l2/1000
@@ -62,7 +62,7 @@ def simulate(l2, l3_c, l4, l5_c, compression_ratio, rest_angle, stiffness, link_
 
     base_pos = [0,0,max(l2, l3)]
     base_ori = [np.sin((np.pi/2 + beta)/2),0,0,np.cos((np.pi/2 + beta)/2)]
-    base_mass = density*l1*np.pi*pow(t,2)
+    base_mass = 0.12 #density*l1*np.pi*pow(t,2)
     base_inertial_pos = [0,0,0]
     base_inertial_ori = [0,0,0,1]
 
@@ -274,8 +274,8 @@ def simulate(l2, l3_c, l4, l5_c, compression_ratio, rest_angle, stiffness, link_
 
     for id in range(nJoints):
         p.changeDynamics(jumper, id,
-                        lateralFriction=1.0,
-                        spinningFriction=0.15,
+                        lateralFriction=0.8,
+                        spinningFriction=0.1,
                         rollingFriction=0.01,
                         restitution=0.9,
                         jointDamping=0.001)
@@ -288,7 +288,8 @@ def simulate(l2, l3_c, l4, l5_c, compression_ratio, rest_angle, stiffness, link_
     contact_count = 0
     time_limit = 10
     start = True
-    EPS = np.pi/180
+    compressed = False
+    EPS = 2*np.pi/180
 
     while count < time_limit:
         focus, _ = p.getBasePositionAndOrientation(jumper)
@@ -304,6 +305,8 @@ def simulate(l2, l3_c, l4, l5_c, compression_ratio, rest_angle, stiffness, link_
             motor_angle = (p.getJointState(jumper, 0)[0])
 
             if motor_angle > compression - EPS and motor_angle < compression + EPS:
+                compressed = True
+            if compressed:
                 compress_count += 1/240
 
             if compress_count > 0.5:
@@ -311,7 +314,8 @@ def simulate(l2, l3_c, l4, l5_c, compression_ratio, rest_angle, stiffness, link_
                     p.setJointMotorControl2(jumper, 
                                             jointIndex=id,
                                             controlMode=p.VELOCITY_CONTROL,
-                                            force=0.005)
+                                            force=0.001)
+                initial_pos_arr, _ = p.getBasePositionAndOrientation(jumper)
                 start = False
 
         else:
@@ -328,7 +332,7 @@ def simulate(l2, l3_c, l4, l5_c, compression_ratio, rest_angle, stiffness, link_
 
                 if contacts:
                     final_pos_arr, _ = p.getBasePositionAndOrientation(jumper)
-                    jump_distance = final_pos_arr[1]
+                    jump_distance = final_pos_arr[1] - initial_pos_arr[1]
                     break
             else:
                 contact_count += 1/240
@@ -346,7 +350,9 @@ def simulate(l2, l3_c, l4, l5_c, compression_ratio, rest_angle, stiffness, link_
     return jump_distance, energy
 
 
-jump_distance, energy = simulate(l2=150, l3_c=1, l4=50, l5_c=0.9, compression_ratio=0.5, rest_angle=60, stiffness=20/1000, link_angle=30)
+jump_distance, energy = simulate(l2=100, l3_c=0.9, l4_c=0.4, l5_c=1.2, compression_ratio=0.8, rest_angle=80, stiffness=9/1000, link_angle=10)
+
+# [100. ,   0.8,   0.4,   1.5,   0.8,  80. ,   1.5,  10. ]
 
 print("Jump Distance: ", jump_distance)
 print("Energy: ", energy)

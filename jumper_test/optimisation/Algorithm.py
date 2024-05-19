@@ -35,25 +35,26 @@ def obj(ga_instance,parameters,solution_idx): # spe declaration of GA
 def function_obj(parameters):
     print("new model")
     robot = Model.model(Model.Parameters(parameters))
-    robot.simulate()
-    max_length = max(robot.parameters.l1,robot.parameters.l2,robot.parameters.l3,robot.parameters.l4,robot.parameters.l5)
+    jump_distance, energy = robot.simulate()
+    max_length = max(robot.parameters.l2, robot.parameters.l3_c*robot.parameters.l2, robot.parameters.l5_c*robot.parameters.l2)
     
-    if robot.energy > 1e-8 : #!= 0.0 : not 0 
-        return (robot.max_length/max_length)#*(robot.energy)
-    else :
-        return 0.0
+    if abs(jump_distance) > 5:
+        return 0
+    else:
+        return (jump_distance)
 
 # Define the boundaries
 
-parameter_name = ["l1", "l2", "l5", "compression", "rest_angle", "stiffness", "link_angle"]
+parameter_name = ["l2", "l3_c", "l4", "l5_c", "compression_ratio", "rest_angle", "stiffness", "link_angle"]
 
 boundaries = np.array([
-    [30, 60], #link
-    [70, 170], 
-    [50, 170],
-    [5, 40], #compression
-    [10, 80], #rest
-    [1.5, 14], #spring
+    [100, 200], #link 2
+    [0.8, 1.2], # link 3 coeff
+    [0.5, 0.9], # link 4 coeff
+    [0.6, 1.4], # link 5 coeff
+    [0.1, 0.8], #compression ratio
+    [20, 70], #rest
+    [5, 30], #spring stiffness
     [10, 80] #link_angle
     ])
 
@@ -75,7 +76,7 @@ def genetic_algorith(generation,bound=boundaries):
                            num_parents_mating=5,
                            fitness_func=obj,
                            sol_per_pop=10,
-                           num_genes=7,
+                           num_genes=8,
                            gene_space=bound,
                            parent_selection_type="sss",
                            keep_parents=2,

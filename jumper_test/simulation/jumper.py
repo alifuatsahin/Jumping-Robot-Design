@@ -314,7 +314,7 @@ def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness, link_angle)
           p.setJointMotorControl2(jumper, 
                                   jointIndex=id,
                                   controlMode=p.VELOCITY_CONTROL,
-                                  force=0.005)
+                                  force=0.001)
           
         start = False
       else:
