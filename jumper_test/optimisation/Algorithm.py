@@ -60,7 +60,7 @@ boundaries = np.array([
 
 #R*boundaries[i][1]/(boundaries[i][1]-boundaries[i][0])
 def create_boundaries(parameter, R):
-    B = np.array([[max(parameter[i] - R*boundaries[i][1]/(boundaries[i][1]-boundaries[i][0]),boundaries[i][0]), min(parameter[i] + R*boundaries[i][1]/(boundaries[i][1]-boundaries[i][0]),boundaries[i][1])] for i in range(len(parameter))])
+    B = np.array([[max(parameter[i] - R*(boundaries[i][1]-boundaries[i][0]),boundaries[i][0]), min(parameter[i] + R*(boundaries[i][1]-boundaries[i][0]),boundaries[i][1])] for i in range(len(parameter))])
     return B.copy()
 
 def create_range(B):
