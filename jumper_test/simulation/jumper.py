@@ -3,29 +3,33 @@ import numpy as np
 import time
 import pybullet as p
 
-def simulate(l1, l2, l5, compression, rest_angle, stiffness, link_angle):
+def simulate(l1, l2, l3, l4, l5, compression, rest_angle, stiffness, link_angle):
   p.connect(p.GUI) #or p.DIRECT to simulate faster
 
   #Create Plane
   plane = p.createCollisionShape(p.GEOM_PLANE)
   p.createMultiBody(0, 0)
-  p.changeDynamics(plane, -1, lateralFriction=1.5)
+  # p.changeDynamics(plane, -1, lateralFriction=1.5)
 
   #Link Lengths [m]
   # l4 = l1 + l4diff
+
+  link_angle = np.pi/180*link_angle
+  rest_angle = rest_angle*np.pi/180
+  compression = compression*np.pi/180
+
   # beta = np.pi/180*beta
-  # l3diff = np.sqrt(pow(l1,2) + pow(l4,2) - 2*l1*l4*np.cos(beta))
+  # l3diff = l1*np.sin(beta)/np.sin(rest_angle-compression)
+  # l4 = np.sqrt(pow(l3diff,2) + pow(l1,2) - 2*l3diff*l1*np.cos(np.pi - (rest_angle-compression) - beta))
+  
   # l3 = l2 - l3diff
 
   l1 = l1/1000
   l2 = l2/1000
-  l3 = l2
-  l4 = l1
+  l3 = l3/1000
+  l4 = l4/1000
   l5 = l5/1000
   t = 4/1000
-  link_angle = np.pi/180*link_angle
-  rest_angle = rest_angle*np.pi/180
-  compression = compression*np.pi/180
 
   #Material Parameters
   density = 1.2*1000 #kg/m3
@@ -68,7 +72,7 @@ def simulate(l1, l2, l5, compression, rest_angle, stiffness, link_angle):
   #                         halfExtents=[50/1000, 62/1000, 148/1000])
                                
   basePos = [0, 0, l2] #[x,y,z]
-  base_orientation = [np.sqrt(2)/2, 0, 0, np.sqrt(2)/2] #quaternion [x,y,z,w]
+  base_orientation = [np.sin((np.pi/2)/2), 0, 0, np.cos((np.pi/2)/2)] #quaternion [x,y,z,w]
   base_i_pos = [0, 0, 0]
   base_i_orientation = [0, 0, 0, 1]
   base_color = [0, 1, 0, 0] #[R, G, B, alpha]
@@ -150,7 +154,7 @@ def simulate(l1, l2, l5, compression, rest_angle, stiffness, link_angle):
                           height=l4,
                           collisionFramePosition=[0,0,l4/2])
 
-  l4_pos = [0, 0, -l2] #[x,y,z]
+  l4_pos = [0, 0, -l3] #[x,y,z]
   l4_orientation = [0, 0, 0, 1] #quaternion [x,y,z,w]
   l4_i_pos = [0, 0, 0]
   l4_i_orientation = [0, 0, 0, 1]
@@ -260,18 +264,18 @@ def simulate(l1, l2, l5, compression, rest_angle, stiffness, link_angle):
     jointNameToId[jointInfo[1].decode('UTF-8')] = jointInfo[0]
     jointIndices[i] = jointInfo[0]
 
-  p.resetJointState(jumper, 0, -(rest_angle-compression))
-  p.resetJointState(jumper, nJoints-1, np.pi-(rest_angle-compression))
-  p.resetJointState(jumper, 1, (rest_angle-compression))
-
   constraint = p.createConstraint(jumper, 
                                   1, 
                                   jumper, 
                                   nJoints-1,
                                   p.JOINT_POINT2POINT,
-                                  [0, 0, 0], 
+                                  [1, 0, 0], 
                                   [0, 0, l4], 
                                   [0, 0, l3])
+
+  p.resetJointState(jumper, 0, -(rest_angle-compression))
+  p.resetJointState(jumper, nJoints-1, np.pi-(rest_angle-compression))
+  p.resetJointState(jumper, 1, (rest_angle-compression))
 
   p.setGravity(0, 0, -9.81)
   p.setRealTimeSimulation(1)
@@ -284,6 +288,14 @@ def simulate(l1, l2, l5, compression, rest_angle, stiffness, link_angle):
   switch = 0
   jump_distance = 0
   time_limit = 5 #seconds
+
+  for id in range(nJoints):
+    p.changeDynamics(jumper, 
+              id, 
+              lateralFriction=1.0,
+              spinningFriction=1.2,
+              rollingFriction=1.2,
+              restitution=0.9)
 
   while counter < time_limit:
       focus, _ = p.getBasePositionAndOrientation(jumper)
@@ -302,14 +314,8 @@ def simulate(l1, l2, l5, compression, rest_angle, stiffness, link_angle):
           p.setJointMotorControl2(jumper, 
                                   jointIndex=id,
                                   controlMode=p.VELOCITY_CONTROL,
-                                  force=0.005)
+                                  force=0.001)
           
-          # p.changeDynamics(jumper, 
-          #                 id, 
-          #                 lateralFriction=0.8,
-          #                 spinningFriction=1.2,
-          #                 rollingFriction=1.2,
-          #                 restitution=0.9)
         start = False
       else:
         motor_angle = (p.getJointState(jumper, 0)[0] + rest_angle)*180/np.pi
@@ -338,20 +344,20 @@ def simulate(l1, l2, l5, compression, rest_angle, stiffness, link_angle):
 
         p.stepSimulation()
 
-      time.sleep(0.015) # !!Comment out while optimizing!!
+      time.sleep(time_step) # !!Comment out while optimizing!!
 
   if switch == 3:
     final_pos_arr, _ = p.getBasePositionAndOrientation(jumper)
     jump_distance = np.sqrt(pow(final_pos_arr[0], 2) + pow(final_pos_arr[1], 2))
   
-  energy = 0.5*stiffness*pow(motor_angle, 2)*np.pi/180
+  energy = 0.5*stiffness*pow(compression, 2)*np.pi/180
 
   p.resetSimulation()
   p.disconnect()
 
   return jump_distance, energy
 
-jump_distance, energy = simulate(l1=40, l2=100, l5=60, compression=30, rest_angle=60, stiffness=8/1000, link_angle=30)
+jump_distance, energy = simulate(l1=60, l2=120, l3=120, l4=60, l5=100, compression=35, rest_angle=45, stiffness=12/1000, link_angle=30)
 
 print("Jump Distance: ", jump_distance)
 print("Energy: ", energy)
