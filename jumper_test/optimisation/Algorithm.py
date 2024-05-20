@@ -205,6 +205,7 @@ def bayesian_optimisation(iteration, initial_sample_size = 10,params = [0], spec
 
                 ax.scatter([arr[params[0]] for arr in pool], [arr[params[1]] for arr in pool], result, color='blue', label='Previous Points')
                 plt.show()
+                
 
         if i % printer == 0 or i == 0 or i == iteration - 1:
             if len(params) == 1:
@@ -240,6 +241,8 @@ def bayesian_optimisation(iteration, initial_sample_size = 10,params = [0], spec
 
             elif len(params) == 2:
                 ax.scatter(best_combination[params[0]], best_combination[params[1]], new_result, color='red', label='New Points')
+                eps = 1e-16
+                plt.savefig('graph/'+str(i)+'.png')
                 plt.show()
             
     # Determine the point with the highest observed function value
