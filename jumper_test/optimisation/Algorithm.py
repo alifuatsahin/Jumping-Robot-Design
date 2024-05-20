@@ -28,20 +28,20 @@ from itertools import product
 
 #https://medium.com/@okanyenigun/step-by-step-guide-to-bayesian-optimization-a-python-based-approach-3558985c6818
 
+point = 20
 # Define the objective function 
 def obj(ga_instance,parameters,solution_idx): # spe declaration of GA
     return function_obj(parameters)
 
 def function_obj(parameters):
-    print("new model")
     robot = Model.model(Model.Parameters(parameters))
     jump_distance, energy = robot.simulate()
     max_length = max(robot.parameters.l2, robot.parameters.l3_c*robot.parameters.l2, robot.parameters.l5_c*robot.parameters.l2)
     
-    if abs(jump_distance) > 5:
+    if abs(jump_distance) > 0.9:
         return 0
     else:
-        return (jump_distance)
+        return (jump_distance/max_length)
 
 # Define the boundaries
 
@@ -60,11 +60,15 @@ boundaries = np.array([
 
 #R*boundaries[i][1]/(boundaries[i][1]-boundaries[i][0])
 def create_boundaries(parameter, R):
-    B = np.array([[max(parameter[i] - R,boundaries[i][0]), min(parameter[i] + R,boundaries[i][1])] for i in range(len(parameter))])
+    B = np.array([[max(parameter[i] - R*boundaries[i][1]/(boundaries[i][1]-boundaries[i][0]),boundaries[i][0]), min(parameter[i] + R*boundaries[i][1]/(boundaries[i][1]-boundaries[i][0]),boundaries[i][1])] for i in range(len(parameter))])
     return B.copy()
 
 def create_range(B):
-    xrange = np.array([np.linspace(bounds[0], bounds[1], 20) for bounds in B])
+    xrange = np.array([np.linspace(bounds[0], bounds[1], point) for bounds in B])
+    return xrange.copy()
+
+def create_array(B):
+    xrange = np.array([{'low': bounds[0], 'high': bounds[1]} for bounds in B])
     return xrange.copy()
         
 
@@ -77,7 +81,7 @@ def genetic_algorith(generation,bound=boundaries):
                            fitness_func=obj,
                            sol_per_pop=10,
                            num_genes=8,
-                           gene_space=bound,
+                           gene_space=create_array(bound),
                            parent_selection_type="sss",
                            keep_parents=2,
                            crossover_type="single_point",
@@ -128,7 +132,7 @@ def bayesian_optimisation(iteration, initial_sample_size = 10,params = [0], spec
     
     pool = []
     result = []
-    param = np.zeros(7)
+    param = np.zeros(8)
     
     # if there is a parameter only, we want to optimise around this param
     if initial_best == []:
@@ -161,7 +165,7 @@ def bayesian_optimisation(iteration, initial_sample_size = 10,params = [0], spec
         
         ucb = []
         # Generate the Upper Confidence Bound (UCB) using the Gaussian process model
-        param_combinations = list(product(*[np.linspace(special_boundaries[P][0], special_boundaries[P][1], 100) for P in params]))
+        param_combinations = list(product(*[np.linspace(special_boundaries[P][0], special_boundaries[P][1], point) for P in params]))
         best_combination = None
         best_ucb = float('-inf')
 
@@ -182,7 +186,7 @@ def bayesian_optimisation(iteration, initial_sample_size = 10,params = [0], spec
                 plt.figure(figsize=(10, 6))
             # Plot the black box function, surrogate function, previous points, and new points
             
-                Range = np.linspace(special_boundaries[params[0]][0], special_boundaries[params[0]][1], 100)
+                Range = np.linspace(special_boundaries[params[0]][0], special_boundaries[params[0]][1], point)
                 plt.plot(Range, ucb, color='red', linestyle='dashed', label='Surrogate Function')
                 plt.scatter([arr[params[0]] for arr in pool], result, color='blue', label='Previous Points')
                 plt.show()
@@ -191,8 +195,8 @@ def bayesian_optimisation(iteration, initial_sample_size = 10,params = [0], spec
                 fig = plt.figure(figsize=(10, 6))
                 ax = fig.add_subplot(111, projection='3d')
                 
-                Range1 = np.linspace(special_boundaries[params[0]][0], special_boundaries[params[0]][1], 100)
-                Range2 = np.linspace(special_boundaries[params[1]][0], special_boundaries[params[1]][1], 100)
+                Range1 = np.linspace(special_boundaries[params[0]][0], special_boundaries[params[0]][1], point)
+                Range2 = np.linspace(special_boundaries[params[1]][0], special_boundaries[params[1]][1], point)
                 Range1_grid, Range2_grid = np.meshgrid(Range1, Range2)
                 ucb_plotting = np.array(ucb).reshape(Range1_grid.shape)
         # Plot the black box function, surrogate function, previous points, and new points
@@ -205,7 +209,7 @@ def bayesian_optimisation(iteration, initial_sample_size = 10,params = [0], spec
         if i % printer == 0 or i == 0 or i == iteration - 1:
             if len(params) == 1:
                 plt.figure(figsize=(10, 6))
-                Range = np.linspace(special_boundaries[params[0]][0], special_boundaries[params[0]][1], 100)
+                Range = np.linspace(special_boundaries[params[0]][0], special_boundaries[params[0]][1], point)
             # Plot the black box function, surrogate function, previous points, and new points
                 plt.plot(Range, ucb, color='red', linestyle='dashed', label='Surrogate Function')
                 plt.scatter([arr[params[0]] for arr in pool], result, color='blue', label='Previous Points')
@@ -214,8 +218,8 @@ def bayesian_optimisation(iteration, initial_sample_size = 10,params = [0], spec
                 fig = plt.figure(figsize=(10, 6))
                 ax = fig.add_subplot(111, projection='3d')
                 
-                Range1 = np.linspace(special_boundaries[params[0]][0], special_boundaries[params[0]][1], 100)
-                Range2 = np.linspace(special_boundaries[params[1]][0], special_boundaries[params[1]][1], 100)
+                Range1 = np.linspace(special_boundaries[params[0]][0], special_boundaries[params[0]][1], point)
+                Range2 = np.linspace(special_boundaries[params[1]][0], special_boundaries[params[1]][1], point)
                 Range1_grid, Range2_grid = np.meshgrid(Range1, Range2)
                 ucb_plotting = np.array(ucb).reshape(Range1_grid.shape)
             # Plot the black box function, surrogate function, previous points, and new points
@@ -257,7 +261,7 @@ def pca(sample, nb_component):
     df = pd.DataFrame(columns=column_names)
     result = pd.DataFrame()
     
-    param = np.zeros(7)
+    param = np.zeros(8)
     
     for i in range(sample):
         for j, (lower, upper) in enumerate(boundaries):
