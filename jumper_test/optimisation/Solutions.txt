@@ -84,3 +84,17 @@ max high 0.389 [m] max distance 0.905 [m] energy  0.7191 J
   [100.           0.99687351   0.82864846   0.934        0.755
   70.          29.5         40.        ]
   max high 0.386 [m] max distance 0.899 [m] energy  0.7149 J
+  
+  
+  
+  
+  BEST GA 
+  
+  array([101.75731727,   0.99737254,   0.832839  ,   0.9336645 ,
+         0.79281927,  67.3686414 ,  29.46853733,  37.95181293])
+max high 0.386 [m] max distance 0.891 [m] energy  0.73 J
+
+  BEST BAEYSIAN
+  
+  [100. ,1,0.833 ,0.934 ,0.755,70.   ,29.5,40]
+  max high 0.389 [m] max distance 0.905 [m] energy  0.7191 J
