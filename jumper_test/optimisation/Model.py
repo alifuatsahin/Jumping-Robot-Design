@@ -5,6 +5,9 @@ import time
 import os
 
 import matplotlib.pyplot as plt
+from tabulate import tabulate
+
+
 
 class Parameters:
     
@@ -22,9 +25,51 @@ class Parameters:
         self.friction = friction #friction
         self.t = thickness
         
+    def to_reality(self):
+        
+        # Parameters
+        link_angle = self.link_angle*np.pi/180
+        rest_angle = self.rest_angle*np.pi/180
+
+        l2 = self.l2
+        l3 = self.l3_c*self.l2
+        l4 = self.l4_c*self.l2
+        l5 = self.l5_c*self.l2
+
+        if l3 != l2:
+            beta = np.arcsin((l3-l2)*np.sin(rest_angle)/l4)
+            l1 = np.sin(rest_angle - beta)*l4/np.sin(rest_angle)
+        else:
+            beta = 0
+            l1 = l4
+
+        compression = self.compression_ratio*(rest_angle + beta)*180/np.pi
+        
+        print(tabulate([['Carrying Link Length link (a)', l2/10,"cm"],
+                        ['Link (b)', l1/10,"cm"],
+                        ['Link (c)', l3/10,"cm"],
+                        ['Link (d)', l4/10,"cm"],
+                        ['Link (e)', l5/10,"cm"],
+                        ['Compression', compression,"deg"],
+                        ['beta', beta,"unit"],
+                        ['Rest Angle', self.rest_angle,"deg"],
+                        ['Ground Link Angle', self.link_angle,"deg"],
+                        ['Spring Stiffness', self.stiffness,"N.mm/deg"]
+                       ],
+                       headers=["parameters","value","unit"]))
+        
     def to_array(self):
         return[self.l2,self.l3_c,self.l4_c,self.l5_c,self.compression_ratio,self.rest_angle,self.stiffness,self.link_angle]
    
+
+def calculate_compression_ratio(compression, rest_angle, l2, l3, l4):
+    if l3 != l2:
+        beta = np.arcsin((l3 - l2) * np.sin(rest_angle) / l4)
+    else:
+        beta = 0
+    
+    compression_ratio = (compression * np.pi) / ((rest_angle + beta) * 180)*180/np.pi
+    return compression_ratio
 
 class model():
     jump = []

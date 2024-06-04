@@ -98,3 +98,7 @@ max high 0.386 [m] max distance 0.891 [m] energy  0.73 J
   
   [100. ,1,0.833 ,0.934 ,0.755,70.   ,29.5,40]
   max high 0.389 [m] max distance 0.905 [m] energy  0.7191 J
+  
+  
+  printed : 
+  [100. ,1,0.833 ,0.934 ,40.7/88.2,88.2,9.2,40]
