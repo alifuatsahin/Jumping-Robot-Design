@@ -54,7 +54,7 @@ Install dependencies with:
 ```bash
 pip install -r requirements.txt
 ```
-##📄 Project Report
+## 📄 Project Report
 For full details, please refer to the 📘 final report (PDF).
 ##📬 Contact
 For questions or collaboration, contact:
