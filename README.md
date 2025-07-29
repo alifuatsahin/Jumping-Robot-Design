@@ -56,7 +56,7 @@ pip install -r requirements.txt
 ```
 ## 📄 Project Report
 For full details, please refer to the 📘 final report (PDF).
-##📬 Contact
+## 📬 Contact
 For questions or collaboration, contact:
 
 Ali Fuat Şahin – alifuat.sahin@epfl.ch
